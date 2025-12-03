@@ -9,6 +9,11 @@ import (
 
 var db *sql.DB
 
+type AvailableSlot struct {
+	SlotTime  string
+	Available bool
+}
+
 func initDB() error {
 	var err error
 	db, err = sql.Open("sqlite3", "./bookings.db")

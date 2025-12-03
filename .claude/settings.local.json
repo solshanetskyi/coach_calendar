@@ -11,7 +11,12 @@
       "Bash(lsof:*)",
       "Bash(xargs kill:*)",
       "Bash(go build:*)",
-      "Bash(./coach-calendar)"
+      "Bash(./coach-calendar)",
+      "Bash(git config:*)",
+      "Bash(go install:*)",
+      "Bash(dlv version:*)",
+      "Bash(go env:*)",
+      "Bash(timeout 3 ./coach-calendar:*)"
     ],
     "deny": [],
     "ask": []
