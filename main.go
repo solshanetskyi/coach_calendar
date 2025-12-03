@@ -1,68 +1,52 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
+
+	"coach-calendar-app/handlers"
 )
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	html := `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Go Web App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-        }
-        p {
-            color: #666;
-            line-height: 1.6;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Welcome to Go Web App!</h1>
-        <p>This is a simple web application built with Go.</p>
-        <p>Successfully deployed and running!</p>
-    </div>
-</body>
-</html>
-`
-	fmt.Fprint(w, html)
-}
-
-func healthHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "OK")
+// Wrapper function to convert types
+func generateSlotsForHandlers() []handlers.AvailableSlot {
+	slots := generateAvailableSlots()
+	handlerSlots := make([]handlers.AvailableSlot, len(slots))
+	for i, slot := range slots {
+		handlerSlots[i] = handlers.AvailableSlot{
+			SlotTime:  slot.SlotTime,
+			Available: slot.Available,
+		}
+	}
+	return handlerSlots
 }
 
 func main() {
+	// Initialize database
+	if err := initDB(); err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer db.Close()
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	http.HandleFunc("/", homeHandler)
-	http.HandleFunc("/health", healthHandler)
+	// Initialize API handlers
+	apiHandlers := handlers.NewAPIHandlers(db, generateSlotsForHandlers)
+
+	// Register page routes
+	http.HandleFunc("/", handlers.HomeHandler)
+	http.HandleFunc("/health", handlers.HealthHandler)
+	http.HandleFunc("/admin", handlers.AdminHandler)
+
+	// Register API routes
+	http.HandleFunc("/api/slots", apiHandlers.GetSlots)
+	http.HandleFunc("/api/bookings", apiHandlers.CreateBooking)
+	http.HandleFunc("/api/admin/slots", apiHandlers.GetAdminSlots)
+	http.HandleFunc("/api/admin/block", apiHandlers.BlockSlot)
+	http.HandleFunc("/api/admin/unblock", apiHandlers.UnblockSlot)
 
 	log.Printf("Server starting on port %s", port)
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
