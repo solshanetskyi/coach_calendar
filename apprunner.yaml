@@ -1,15 +1,9 @@
 version: 1.0
-runtime: go1
+runtime: docker
 build:
-  commands:
-    build:
-      - echo "Installing build dependencies for CGO and SQLite..."
-      - apk add --no-cache gcc musl-dev sqlite-dev
-      - echo "Building application with CGO enabled..."
-      - CGO_ENABLED=1 go build -o coach-calendar .
-      - echo "Build complete!"
+  dockerfile: Dockerfile
 run:
-  command: ./coach-calendar
+  command: ./main
   network:
     port: 8080
   env:
