@@ -1,0 +1,15 @@
+version: 1.0
+runtime: go1
+build:
+  commands:
+    pre-build:
+      - apk add --no-cache gcc musl-dev sqlite-dev
+    build:
+      - CGO_ENABLED=1 go build -o coach-calendar .
+run:
+  command: ./coach-calendar
+  network:
+    port: 8080
+  env:
+    - name: PORT
+      value: "8080"
