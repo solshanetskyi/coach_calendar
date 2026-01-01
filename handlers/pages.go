@@ -20,11 +20,52 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
             box-sizing: border-box;
         }
 
+        :root {
+            /* Theme 1: Rose Garden (Default) */
+            --primary-start: #e63946;
+            --primary-end: #d62828;
+            --accent-color: #f77f00;
+            --gradient-bg: linear-gradient(135deg, #e63946 0%, #d62828 100%);
+        }
+
+        [data-theme="cherry-blossom"] {
+            /* Theme 2: Cherry Blossom */
+            --primary-start: #ff006e;
+            --primary-end: #fb5607;
+            --accent-color: #ffbe0b;
+            --gradient-bg: linear-gradient(135deg, #ff006e 0%, #fb5607 100%);
+        }
+
+        [data-theme="sunset-coral"] {
+            /* Theme 3: Sunset Coral */
+            --primary-start: #d00000;
+            --primary-end: #9d0208;
+            --accent-color: #dc2f02;
+            --gradient-bg: linear-gradient(135deg, #d00000 0%, #9d0208 100%);
+        }
+
+        [data-theme="berry-burst"] {
+            /* Theme 4: Berry Burst */
+            --primary-start: #c9184a;
+            --primary-end: #a4133c;
+            --accent-color: #ff4d6d;
+            --gradient-bg: linear-gradient(135deg, #c9184a 0%, #a4133c 100%);
+        }
+
+        [data-theme="pink-lemonade"] {
+            /* Theme 5: Pink Lemonade */
+            --primary-start: #ff758f;
+            --primary-end: #ff4d6d;
+            --accent-color: #ffccd5;
+            --gradient-bg: linear-gradient(135deg, #ff758f 0%, #ff4d6d 100%);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient-bg);
             min-height: 100vh;
             padding: 20px;
+            transition: background 0.3s ease;
         }
 
         .container {
@@ -37,7 +78,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient-bg);
             color: white;
             padding: 40px;
             text-align: center;
@@ -79,15 +120,15 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         .day-cell:hover {
-            border-color: #667eea;
+            border-color: var(--primary-start);
             background: #f0f4ff;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
         .day-cell.selected {
-            border-color: #667eea;
-            background: #667eea;
+            border-color: var(--primary-start);
+            background: var(--primary-start);
             color: white;
         }
 
@@ -171,7 +212,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         .time-slot:hover {
-            border-color: #667eea;
+            border-color: var(--primary-start);
             background: #f0f4ff;
             transform: translateY(-2px);
         }
@@ -242,7 +283,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary-start);
         }
 
         .selected-slot-info {
@@ -254,7 +295,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         .selected-slot-info strong {
-            color: #667eea;
+            color: var(--primary-start);
             font-size: 1.1rem;
         }
 
@@ -270,7 +311,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient-bg);
             color: white;
         }
 
@@ -313,7 +354,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
         .nav-btn {
             padding: 10px 20px;
-            background: #667eea;
+            background: var(--primary-start);
             color: white;
             border: none;
             border-radius: 6px;
@@ -323,7 +364,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         .nav-btn:hover {
-            background: #5568d3;
+            background: var(--primary-end);
             transform: translateY(-2px);
         }
 
@@ -370,6 +411,82 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         .duration-toggle {
             display: none; /* Hidden - only 30min slots available */
         }
+
+        .theme-selector {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-selector-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        .theme-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .theme-btn {
+            padding: 8px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-btn.active {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--primary-start);
+            border-color: rgba(255, 255, 255, 0.95);
+        }
+
+        .theme-preview {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            vertical-align: middle;
+        }
+
+        .theme-preview.rose-garden {
+            background: linear-gradient(135deg, #e63946 0%, #d62828 100%);
+        }
+
+        .theme-preview.cherry-blossom {
+            background: linear-gradient(135deg, #ff006e 0%, #fb5607 100%);
+        }
+
+        .theme-preview.sunset-coral {
+            background: linear-gradient(135deg, #d00000 0%, #9d0208 100%);
+        }
+
+        .theme-preview.berry-burst {
+            background: linear-gradient(135deg, #c9184a 0%, #a4133c 100%);
+        }
+
+        .theme-preview.pink-lemonade {
+            background: linear-gradient(135deg, #ff758f 0%, #ff4d6d 100%);
+        }
     </style>
 </head>
 <body>
@@ -381,6 +498,26 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
             <div class="duration-toggle">
                 <button class="duration-btn active" id="duration30m" onclick="setDuration('30m')">30 хвилин</button>
                 <button class="duration-btn" id="duration1h" onclick="setDuration('1h')">1 година</button>
+            </div>
+            <div class="theme-selector">
+                <div class="theme-selector-label">🎨 Виберіть тему:</div>
+                <div class="theme-options">
+                    <button class="theme-btn active" onclick="changeTheme('rose-garden')" data-theme="rose-garden">
+                        <span class="theme-preview rose-garden"></span>Троянда
+                    </button>
+                    <button class="theme-btn" onclick="changeTheme('cherry-blossom')" data-theme="cherry-blossom">
+                        <span class="theme-preview cherry-blossom"></span>Сакура
+                    </button>
+                    <button class="theme-btn" onclick="changeTheme('sunset-coral')" data-theme="sunset-coral">
+                        <span class="theme-preview sunset-coral"></span>Корал
+                    </button>
+                    <button class="theme-btn" onclick="changeTheme('berry-burst')" data-theme="berry-burst">
+                        <span class="theme-preview berry-burst"></span>Ягода
+                    </button>
+                    <button class="theme-btn" onclick="changeTheme('pink-lemonade')" data-theme="pink-lemonade">
+                        <span class="theme-preview pink-lemonade"></span>Рожевий лимонад
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -819,7 +956,35 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
             }, 5000);
         }
 
-        // Initialize page - display timezone and load slots
+        // Theme management
+        function changeTheme(themeName) {
+            // Update body data-theme attribute
+            if (themeName === 'rose-garden') {
+                document.body.removeAttribute('data-theme');
+            } else {
+                document.body.setAttribute('data-theme', themeName);
+            }
+
+            // Update active button
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-theme') === themeName) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Save preference to localStorage
+            localStorage.setItem('selectedTheme', themeName);
+        }
+
+        // Load saved theme on page load
+        function loadSavedTheme() {
+            const savedTheme = localStorage.getItem('selectedTheme') || 'rose-garden';
+            changeTheme(savedTheme);
+        }
+
+        // Initialize page - load theme, display timezone and load slots
+        loadSavedTheme();
         displayTimezone();
         loadSlots();
     </script>
@@ -845,11 +1010,52 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
             box-sizing: border-box;
         }
 
+        :root {
+            /* Theme 1: Rose Garden (Default) */
+            --primary-start: #e63946;
+            --primary-end: #d62828;
+            --accent-color: #f77f00;
+            --gradient-bg: linear-gradient(135deg, #e63946 0%, #d62828 100%);
+        }
+
+        [data-theme="cherry-blossom"] {
+            /* Theme 2: Cherry Blossom */
+            --primary-start: #ff006e;
+            --primary-end: #fb5607;
+            --accent-color: #ffbe0b;
+            --gradient-bg: linear-gradient(135deg, #ff006e 0%, #fb5607 100%);
+        }
+
+        [data-theme="sunset-coral"] {
+            /* Theme 3: Sunset Coral */
+            --primary-start: #d00000;
+            --primary-end: #9d0208;
+            --accent-color: #dc2f02;
+            --gradient-bg: linear-gradient(135deg, #d00000 0%, #9d0208 100%);
+        }
+
+        [data-theme="berry-burst"] {
+            /* Theme 4: Berry Burst */
+            --primary-start: #c9184a;
+            --primary-end: #a4133c;
+            --accent-color: #ff4d6d;
+            --gradient-bg: linear-gradient(135deg, #c9184a 0%, #a4133c 100%);
+        }
+
+        [data-theme="pink-lemonade"] {
+            /* Theme 5: Pink Lemonade */
+            --primary-start: #ff758f;
+            --primary-end: #ff4d6d;
+            --accent-color: #ffccd5;
+            --gradient-bg: linear-gradient(135deg, #ff758f 0%, #ff4d6d 100%);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient-bg);
             min-height: 100vh;
             padding: 20px;
+            transition: background 0.3s ease;
         }
 
         .container {
@@ -862,7 +1068,7 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient-bg);
             color: white;
             padding: 40px;
             text-align: center;
@@ -915,7 +1121,7 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient-bg);
             color: white;
             padding: 25px;
             border-radius: 12px;
@@ -951,14 +1157,14 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         .filter-btn:hover {
-            border-color: #667eea;
+            border-color: var(--primary-start);
             background: #f0f4ff;
         }
 
         .filter-btn.active {
-            background: #667eea;
+            background: var(--primary-start);
             color: white;
-            border-color: #667eea;
+            border-color: var(--primary-start);
         }
 
         .slots-container {
@@ -1176,7 +1382,7 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient-bg);
             color: white;
             padding: 25px 30px;
             border-radius: 12px 12px 0 0;
@@ -1243,7 +1449,7 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
 
         .modal-detail-value.large {
             font-size: 1.3rem;
-            color: #667eea;
+            color: var(--primary-start);
             font-weight: 600;
         }
 
@@ -1255,6 +1461,82 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
             box-shadow: 0 6px 16px rgba(102, 126, 234, 0.2);
             transform: translateY(-2px);
         }
+
+        .theme-selector {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-selector-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        .theme-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .theme-btn {
+            padding: 8px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-btn.active {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--primary-start);
+            border-color: rgba(255, 255, 255, 0.95);
+        }
+
+        .theme-preview {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            vertical-align: middle;
+        }
+
+        .theme-preview.rose-garden {
+            background: linear-gradient(135deg, #e63946 0%, #d62828 100%);
+        }
+
+        .theme-preview.cherry-blossom {
+            background: linear-gradient(135deg, #ff006e 0%, #fb5607 100%);
+        }
+
+        .theme-preview.sunset-coral {
+            background: linear-gradient(135deg, #d00000 0%, #9d0208 100%);
+        }
+
+        .theme-preview.berry-burst {
+            background: linear-gradient(135deg, #c9184a 0%, #a4133c 100%);
+        }
+
+        .theme-preview.pink-lemonade {
+            background: linear-gradient(135deg, #ff758f 0%, #ff4d6d 100%);
+        }
     </style>
 </head>
 <body>
@@ -1264,6 +1546,26 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
             <p>Керування бронюваннями та доступністю слотів</p>
             <div class="timezone-info" id="adminTimezoneInfo">Завантаження часового поясу...</div>
             <a href="/" class="nav-link">← Повернутись до сторінки бронювання</a>
+            <div class="theme-selector">
+                <div class="theme-selector-label">🎨 Виберіть тему:</div>
+                <div class="theme-options">
+                    <button class="theme-btn active" onclick="changeTheme('rose-garden')" data-theme="rose-garden">
+                        <span class="theme-preview rose-garden"></span>Троянда
+                    </button>
+                    <button class="theme-btn" onclick="changeTheme('cherry-blossom')" data-theme="cherry-blossom">
+                        <span class="theme-preview cherry-blossom"></span>Сакура
+                    </button>
+                    <button class="theme-btn" onclick="changeTheme('sunset-coral')" data-theme="sunset-coral">
+                        <span class="theme-preview sunset-coral"></span>Корал
+                    </button>
+                    <button class="theme-btn" onclick="changeTheme('berry-burst')" data-theme="berry-burst">
+                        <span class="theme-preview berry-burst"></span>Ягода
+                    </button>
+                    <button class="theme-btn" onclick="changeTheme('pink-lemonade')" data-theme="pink-lemonade">
+                        <span class="theme-preview pink-lemonade"></span>Рожевий лимонад
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="content">
@@ -1537,7 +1839,35 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
             }, 5000);
         }
 
-        // Display timezone and load slots when page loads
+        // Theme management
+        function changeTheme(themeName) {
+            // Update body data-theme attribute
+            if (themeName === 'rose-garden') {
+                document.body.removeAttribute('data-theme');
+            } else {
+                document.body.setAttribute('data-theme', themeName);
+            }
+
+            // Update active button
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-theme') === themeName) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Save preference to localStorage
+            localStorage.setItem('selectedTheme', themeName);
+        }
+
+        // Load saved theme on page load
+        function loadSavedTheme() {
+            const savedTheme = localStorage.getItem('selectedTheme') || 'rose-garden';
+            changeTheme(savedTheme);
+        }
+
+        // Display timezone, load theme and load slots when page loads
+        loadSavedTheme();
         displayTimezone();
         loadSlots();
     </script>
