@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 var db *sql.DB
@@ -16,7 +16,7 @@ type AvailableSlot struct {
 
 func initDB() error {
 	var err error
-	db, err = sql.Open("sqlite3", "./bookings.db")
+	db, err = sql.Open("sqlite", "./bookings.db")
 	if err != nil {
 		return err
 	}
