@@ -356,6 +356,20 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         .message.active {
             display: block;
         }
+
+        .timezone-info {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .duration-toggle {
+            display: none; /* Hidden - only 30min slots available */
+        }
     </style>
 </head>
 <body>
@@ -363,6 +377,11 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         <div class="header">
             <h1>Meeting Booking</h1>
             <p>Select a day, then choose your preferred time slot</p>
+            <div class="timezone-info" id="timezoneInfo">Loading timezone...</div>
+            <div class="duration-toggle">
+                <button class="duration-btn active" id="duration30m" onclick="setDuration('30m')">30 Minutes</button>
+                <button class="duration-btn" id="duration1h" onclick="setDuration('1h')">1 Hour</button>
+            </div>
         </div>
 
         <div class="content">
@@ -417,6 +436,15 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         let allSlots = [];
         let currentMonthIndex = 0;
         let availableMonths = [];
+        let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        // Display user's timezone
+        function displayTimezone() {
+            const tzInfo = document.getElementById('timezoneInfo');
+            if (tzInfo) {
+                tzInfo.textContent = '🌍 All times shown in: ' + userTimezone;
+            }
+        }
 
         function formatDateTime(isoString) {
             const date = new Date(isoString);
@@ -425,7 +453,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
                 month: 'long',
                 day: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                timeZone: userTimezone
             };
             return date.toLocaleString('en-US', options);
         }
@@ -436,13 +465,19 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric',
-                year: 'numeric'
+                year: 'numeric',
+                timeZone: userTimezone
             });
         }
 
         function formatTime(isoString) {
             const date = new Date(isoString);
-            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            return date.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: userTimezone
+            });
         }
 
         function formatMonthYear(year, month) {
@@ -452,7 +487,11 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
         function getDayKey(dateString) {
             const date = new Date(dateString);
-            return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+            // Convert to user's timezone for proper day grouping
+            const year = parseInt(date.toLocaleString('en-US', { year: 'numeric', timeZone: userTimezone }));
+            const month = parseInt(date.toLocaleString('en-US', { month: 'numeric', timeZone: userTimezone }));
+            const day = parseInt(date.toLocaleString('en-US', { day: 'numeric', timeZone: userTimezone }));
+            return year + '-' + month + '-' + day;
         }
 
         function groupSlotsByMonth(slots) {
@@ -460,8 +499,10 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
             slots.forEach(slot => {
                 const date = new Date(slot.slot_time);
-                const year = date.getFullYear();
-                const month = date.getMonth();
+                // Get year and month in user's timezone
+                const year = parseInt(date.toLocaleString('en-US', { year: 'numeric', timeZone: userTimezone }));
+                const month = parseInt(date.toLocaleString('en-US', { month: 'numeric', timeZone: userTimezone })) - 1;
+                const day = parseInt(date.toLocaleString('en-US', { day: 'numeric', timeZone: userTimezone }));
                 const key = year + '-' + month;
 
                 if (!monthMap.has(key)) {
@@ -477,7 +518,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
                 if (!monthData.days.has(dayKey)) {
                     monthData.days.set(dayKey, {
-                        date: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
+                        date: new Date(year, month, day),
                         slots: []
                     });
                 }
@@ -517,6 +558,10 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
         async function loadSlots() {
             try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('calendar').style.display = 'none';
+                document.getElementById('monthNavigation').style.display = 'none';
+
                 const response = await fetch('/api/slots');
                 if (!response.ok) {
                     throw new Error('Failed to load slots');
@@ -528,6 +573,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('monthNavigation').style.display = 'flex';
+                document.getElementById('calendar').style.display = 'grid';
 
                 renderCalendar();
             } catch (error) {
@@ -773,7 +819,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
             }, 5000);
         }
 
-        // Load slots when page loads
+        // Initialize page - display timezone and load slots
+        displayTimezone();
         loadSlots();
     </script>
 </body>
@@ -829,6 +876,16 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
         .header p {
             font-size: 1.1rem;
             opacity: 0.9;
+        }
+
+        .timezone-info {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin: 10px 0;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            display: inline-block;
         }
 
         .nav-link {
@@ -1070,6 +1127,134 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
             font-size: 1.5rem;
             margin-bottom: 10px;
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 20px;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-detail-row {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .modal-detail-label {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .modal-detail-value {
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .modal-detail-value.large {
+            font-size: 1.3rem;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .slot-card {
+            cursor: pointer;
+        }
+
+        .slot-card.booked:hover {
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -1077,6 +1262,7 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
         <div class="header">
             <h1>Admin Panel</h1>
             <p>Manage bookings and slot availability</p>
+            <div class="timezone-info" id="adminTimezoneInfo">Loading timezone...</div>
             <a href="/" class="nav-link">← Back to Booking Page</a>
         </div>
 
@@ -1119,9 +1305,48 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
         </div>
     </div>
 
+    <!-- Booking Details Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Booking Details</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-detail-row">
+                    <div class="modal-detail-label">Appointment Time</div>
+                    <div class="modal-detail-value large" id="modalDateTime"></div>
+                </div>
+                <div class="modal-detail-row">
+                    <div class="modal-detail-label">Status</div>
+                    <div class="modal-detail-value">
+                        <span class="status-badge booked">BOOKED</span>
+                    </div>
+                </div>
+                <div class="modal-detail-row">
+                    <div class="modal-detail-label">Client Name</div>
+                    <div class="modal-detail-value" id="modalName"></div>
+                </div>
+                <div class="modal-detail-row">
+                    <div class="modal-detail-label">Client Email</div>
+                    <div class="modal-detail-value" id="modalEmail"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let allSlots = [];
         let currentFilter = 'all';
+        let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        // Display user's timezone
+        function displayTimezone() {
+            const tzInfo = document.getElementById('adminTimezoneInfo');
+            if (tzInfo) {
+                tzInfo.textContent = '🌍 All times shown in: ' + userTimezone;
+            }
+        }
 
         function formatDateTime(isoString) {
             const date = new Date(isoString);
@@ -1131,9 +1356,36 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
                 day: 'numeric',
                 year: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                timeZone: userTimezone
             });
         }
+
+        function openBookingModal(slot) {
+            document.getElementById('modalDateTime').textContent = formatDateTime(slot.slot_time);
+            document.getElementById('modalName').textContent = slot.name || 'N/A';
+            document.getElementById('modalEmail').textContent = slot.email || 'N/A';
+            document.getElementById('bookingModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('bookingModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('bookingModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
 
         async function loadSlots() {
             try {
@@ -1198,18 +1450,24 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
                 const slotCard = document.createElement('div');
                 slotCard.className = 'slot-card ' + slot.status;
 
+                // Add click handler for booked slots to open modal
+                if (slot.status === 'booked') {
+                    slotCard.onclick = function() {
+                        openBookingModal(slot);
+                    };
+                }
+
                 let detailsHTML = '<span class="status-badge ' + slot.status + '">' + slot.status + '</span>';
 
                 if (slot.status === 'booked' && slot.name && slot.email) {
                     detailsHTML += '<div class="slot-detail">👤 ' + slot.name + '</div>';
-                    detailsHTML += '<div class="slot-detail">📧 ' + slot.email + '</div>';
                 }
 
                 let actionsHTML = '';
                 if (slot.status === 'available') {
-                    actionsHTML = '<button class="action-btn block" onclick="blockSlot(\'' + slot.slot_time + '\')">Block</button>';
+                    actionsHTML = '<button class="action-btn block" onclick="event.stopPropagation(); blockSlot(\'' + slot.slot_time + '\')">Block</button>';
                 } else if (slot.status === 'blocked') {
-                    actionsHTML = '<button class="action-btn unblock" onclick="unblockSlot(\'' + slot.slot_time + '\')">Unblock</button>';
+                    actionsHTML = '<button class="action-btn unblock" onclick="event.stopPropagation(); unblockSlot(\'' + slot.slot_time + '\')">Unblock</button>';
                 }
 
                 slotCard.innerHTML =
@@ -1279,7 +1537,8 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
             }, 5000);
         }
 
-        // Load slots when page loads
+        // Display timezone and load slots when page loads
+        displayTimezone();
         loadSlots();
     </script>
 </body>

@@ -16,7 +16,8 @@
       "Bash(go install:*)",
       "Bash(dlv version:*)",
       "Bash(go env:*)",
-      "Bash(timeout 3 ./coach-calendar:*)"
+      "Bash(timeout 3 ./coach-calendar:*)",
+      "Bash(go get:*)"
     ],
     "deny": [],
     "ask": []

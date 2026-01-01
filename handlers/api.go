@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+// EmailSender interface for sending emails
+type EmailSender interface {
+	SendBookingConfirmation(name, email string, slotTime time.Time) error
+}
+
 // Re-export types from main package
 type Booking struct {
 	ID        int       `json:"id"`
@@ -40,12 +45,14 @@ type GenerateSlotsFn func() []AvailableSlot
 type APIHandlers struct {
 	DB                     *sql.DB
 	GenerateAvailableSlots GenerateSlotsFn
+	EmailService           EmailSender
 }
 
-func NewAPIHandlers(db *sql.DB, generateSlotsFn GenerateSlotsFn) *APIHandlers {
+func NewAPIHandlers(db *sql.DB, generateSlotsFn GenerateSlotsFn, emailService EmailSender) *APIHandlers {
 	return &APIHandlers{
 		DB:                     db,
 		GenerateAvailableSlots: generateSlotsFn,
+		EmailService:           emailService,
 	}
 }
 
@@ -55,6 +62,7 @@ func (h *APIHandlers) GetSlots(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Only 30-minute slots are available
 	slots := h.GenerateAvailableSlots()
 
 	// Get booked slots from database
@@ -146,6 +154,15 @@ func (h *APIHandlers) CreateBooking(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Error creating booking: %v", err)
 		}
 		return
+	}
+
+	// Send confirmation email
+	if h.EmailService != nil {
+		err = h.EmailService.SendBookingConfirmation(req.Name, req.Email, slotTime)
+		if err != nil {
+			// Log the error but don't fail the booking
+			log.Printf("Warning: Booking created but failed to send confirmation email: %v", err)
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")

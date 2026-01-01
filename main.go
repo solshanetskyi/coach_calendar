@@ -28,13 +28,16 @@ func main() {
 	}
 	defer db.Close()
 
+	// Initialize email service
+	emailService := NewEmailService()
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
 	// Initialize API handlers
-	apiHandlers := handlers.NewAPIHandlers(db, generateSlotsForHandlers)
+	apiHandlers := handlers.NewAPIHandlers(db, generateSlotsForHandlers, emailService)
 
 	// Register page routes
 	http.HandleFunc("/", handlers.HomeHandler)
