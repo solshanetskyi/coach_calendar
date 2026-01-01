@@ -8,11 +8,11 @@ import (
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	html := `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meeting Booking - Coach Calendar</title>
+    <title>Бронювання зустрічі - Календар тренера</title>
     <style>
         * {
             margin: 0;
@@ -375,12 +375,12 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 <body>
     <div class="container">
         <div class="header">
-            <h1>Meeting Booking</h1>
-            <p>Select a day, then choose your preferred time slot</p>
-            <div class="timezone-info" id="timezoneInfo">Loading timezone...</div>
+            <h1>Бронювання зустрічі</h1>
+            <p>Виберіть день, потім оберіть зручний для вас час</p>
+            <div class="timezone-info" id="timezoneInfo">Завантаження часового поясу...</div>
             <div class="duration-toggle">
-                <button class="duration-btn active" id="duration30m" onclick="setDuration('30m')">30 Minutes</button>
-                <button class="duration-btn" id="duration1h" onclick="setDuration('1h')">1 Hour</button>
+                <button class="duration-btn active" id="duration30m" onclick="setDuration('30m')">30 хвилин</button>
+                <button class="duration-btn" id="duration1h" onclick="setDuration('1h')">1 година</button>
             </div>
         </div>
 
@@ -388,44 +388,44 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
             <div id="message" class="message"></div>
 
             <div id="loading" class="loading">
-                Loading available slots...
+                Завантаження доступних слотів...
             </div>
 
             <div id="monthNavigation" class="month-navigation" style="display: none;">
-                <button class="nav-btn" id="prevMonth" onclick="changeMonth(-1)">← Previous</button>
+                <button class="nav-btn" id="prevMonth" onclick="changeMonth(-1)">← Попередній</button>
                 <div class="month-title" id="currentMonth"></div>
-                <button class="nav-btn" id="nextMonth" onclick="changeMonth(1)">Next →</button>
+                <button class="nav-btn" id="nextMonth" onclick="changeMonth(1)">Наступний →</button>
             </div>
 
             <div id="calendar" class="calendar-grid"></div>
 
             <div id="timeSlotsPanel" class="time-slots-panel">
-                <button class="back-btn" onclick="backToCalendar()">← Back to Calendar</button>
+                <button class="back-btn" onclick="backToCalendar()">← Повернутись до календаря</button>
                 <div class="time-slots-header">
                     <h3 id="selectedDateTitle"></h3>
-                    <p>Choose an available time slot</p>
+                    <p>Оберіть зручний час</p>
                 </div>
                 <div id="timeSlotsGrid" class="time-slots-grid"></div>
             </div>
 
             <div id="bookingForm" class="booking-form">
                 <div class="selected-slot-info">
-                    <div>Selected Time:</div>
+                    <div>Обраний час:</div>
                     <strong id="selectedSlotDisplay"></strong>
                 </div>
 
                 <div class="form-group">
-                    <label for="name">Your Name</label>
-                    <input type="text" id="name" placeholder="Enter your full name" required>
+                    <label for="name">Ваше ім'я</label>
+                    <input type="text" id="name" placeholder="Введіть ваше повне ім'я" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Your Email</label>
+                    <label for="email">Ваш email</label>
                     <input type="email" id="email" placeholder="your.email@example.com" required>
                 </div>
 
-                <button class="btn btn-primary" onclick="confirmBooking()">Confirm Booking</button>
-                <button class="btn btn-secondary" onclick="cancelBooking()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmBooking()">Підтвердити бронювання</button>
+                <button class="btn btn-secondary" onclick="cancelBooking()">Скасувати</button>
             </div>
         </div>
     </div>
@@ -442,7 +442,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         function displayTimezone() {
             const tzInfo = document.getElementById('timezoneInfo');
             if (tzInfo) {
-                tzInfo.textContent = '🌍 All times shown in: ' + userTimezone;
+                tzInfo.textContent = '🌍 Весь час показано у: ' + userTimezone;
             }
         }
 
@@ -456,12 +456,12 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
                 minute: '2-digit',
                 timeZone: userTimezone
             };
-            return date.toLocaleString('en-US', options);
+            return date.toLocaleString('uk-UA', options);
         }
 
         function formatDateLong(isoString) {
             const date = new Date(isoString);
-            return date.toLocaleDateString('en-US', {
+            return date.toLocaleDateString('uk-UA', {
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric',
@@ -472,17 +472,17 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
         function formatTime(isoString) {
             const date = new Date(isoString);
-            return date.toLocaleTimeString('en-US', {
+            return date.toLocaleTimeString('uk-UA', {
                 hour: '2-digit',
                 minute: '2-digit',
-                hour12: true,
+                hour12: false,
                 timeZone: userTimezone
             });
         }
 
         function formatMonthYear(year, month) {
             const date = new Date(year, month);
-            return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            return date.toLocaleDateString('uk-UA', { month: 'long', year: 'numeric' });
         }
 
         function getDayKey(dateString) {
@@ -578,7 +578,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
                 renderCalendar();
             } catch (error) {
                 console.error('Error loading slots:', error);
-                showMessage('Failed to load available slots. Please refresh the page.', 'error');
+                showMessage('Не вдалося завантажити доступні слоти. Будь ласка, оновіть сторінку.', 'error');
                 document.getElementById('loading').style.display = 'none';
             }
         }
@@ -588,7 +588,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
             calendar.innerHTML = '';
 
             if (availableMonths.length === 0) {
-                calendar.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No available slots found.</div>';
+                calendar.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">Немає доступних слотів.</div>';
                 return;
             }
 
@@ -647,12 +647,12 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
                     dayDiv.className = 'day-cell' + (hasAvailable ? '' : ' no-slots');
 
                     const date = dayData.date;
-                    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                    const dayName = date.toLocaleDateString('uk-UA', { weekday: 'short' });
                     const dayNumber = date.getDate();
 
                     dayDiv.innerHTML = '<div class="day-number">' + dayNumber + '</div>' +
                         '<div class="day-name">' + dayName + '</div>' +
-                        '<div class="day-slots-count">' + availableCount + ' available</div>';
+                        '<div class="day-slots-count">' + availableCount + ' доступно</div>';
 
                     if (hasAvailable) {
                         dayDiv.onclick = () => selectDay(dayData);
@@ -671,7 +671,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
             document.getElementById('monthNavigation').style.display = 'none';
             document.getElementById('timeSlotsPanel').classList.add('active');
 
-            const dateStr = dayData.date.toLocaleDateString('en-US', {
+            const dateStr = dayData.date.toLocaleDateString('uk-UA', {
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric',
@@ -736,12 +736,12 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
             const email = document.getElementById('email').value.trim();
 
             if (!name || !email) {
-                showMessage('Please fill in all fields', 'error');
+                showMessage('Будь ласка, заповніть всі поля', 'error');
                 return;
             }
 
             if (!validateEmail(email)) {
-                showMessage('Please enter a valid email address', 'error');
+                showMessage('Будь ласка, введіть дійсну email адресу', 'error');
                 return;
             }
 
@@ -759,7 +759,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
                 });
 
                 if (response.ok) {
-                    showMessage('Booking confirmed! You will receive a confirmation email shortly.', 'success');
+                    showMessage('Бронювання підтверджено! Ви отримаєте лист-підтвердження найближчим часом.', 'success');
 
                     // Mark the slot as unavailable in local data
                     markSlotAsBooked(selectedSlot.slot_time);
@@ -774,15 +774,15 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
                     }
                     renderCalendar();
                 } else if (response.status === 409) {
-                    showMessage('This slot has already been booked. Please select another time.', 'error');
+                    showMessage('Цей слот вже заброньовано. Будь ласка, оберіть інший час.', 'error');
                     loadSlots(); // Reload slots to get fresh data
                 } else {
                     const error = await response.text();
-                    showMessage('Failed to create booking: ' + error, 'error');
+                    showMessage('Не вдалося створити бронювання: ' + error, 'error');
                 }
             } catch (error) {
                 console.error('Error creating booking:', error);
-                showMessage('Failed to create booking. Please try again.', 'error');
+                showMessage('Не вдалося створити бронювання. Будь ласка, спробуйте ще раз.', 'error');
             }
         }
 
@@ -833,11 +833,11 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 func AdminHandler(w http.ResponseWriter, r *http.Request) {
 	html := `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Coach Calendar</title>
+    <title>Панель адміністратора - Календар тренера</title>
     <style>
         * {
             margin: 0;
@@ -1260,10 +1260,10 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
 <body>
     <div class="container">
         <div class="header">
-            <h1>Admin Panel</h1>
-            <p>Manage bookings and slot availability</p>
-            <div class="timezone-info" id="adminTimezoneInfo">Loading timezone...</div>
-            <a href="/" class="nav-link">← Back to Booking Page</a>
+            <h1>Панель адміністратора</h1>
+            <p>Керування бронюваннями та доступністю слотів</p>
+            <div class="timezone-info" id="adminTimezoneInfo">Завантаження часового поясу...</div>
+            <a href="/" class="nav-link">← Повернутись до сторінки бронювання</a>
         </div>
 
         <div class="content">
@@ -1272,31 +1272,31 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
             <div class="stats">
                 <div class="stat-card">
                     <h3 id="totalSlots">-</h3>
-                    <p>Total Slots</p>
+                    <p>Всього слотів</p>
                 </div>
                 <div class="stat-card">
                     <h3 id="availableSlots">-</h3>
-                    <p>Available</p>
+                    <p>Доступні</p>
                 </div>
                 <div class="stat-card">
                     <h3 id="bookedSlots">-</h3>
-                    <p>Booked</p>
+                    <p>Заброньовані</p>
                 </div>
                 <div class="stat-card">
                     <h3 id="blockedSlots">-</h3>
-                    <p>Blocked</p>
+                    <p>Заблоковані</p>
                 </div>
             </div>
 
             <div class="filters">
-                <button class="filter-btn active" onclick="filterSlots('all')">All Slots</button>
-                <button class="filter-btn" onclick="filterSlots('available')">Available</button>
-                <button class="filter-btn" onclick="filterSlots('booked')">Booked</button>
-                <button class="filter-btn" onclick="filterSlots('blocked')">Blocked</button>
+                <button class="filter-btn active" onclick="filterSlots('all')">Всі слоти</button>
+                <button class="filter-btn" onclick="filterSlots('available')">Доступні</button>
+                <button class="filter-btn" onclick="filterSlots('booked')">Заброньовані</button>
+                <button class="filter-btn" onclick="filterSlots('blocked')">Заблоковані</button>
             </div>
 
             <div id="loading" class="loading">
-                Loading slots...
+                Завантаження слотів...
             </div>
 
             <div id="slotsContainer" class="slots-container" style="display: none;">
@@ -1309,26 +1309,26 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
     <div id="bookingModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Booking Details</h2>
+                <h2>Деталі бронювання</h2>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="modal-detail-row">
-                    <div class="modal-detail-label">Appointment Time</div>
+                    <div class="modal-detail-label">Час зустрічі</div>
                     <div class="modal-detail-value large" id="modalDateTime"></div>
                 </div>
                 <div class="modal-detail-row">
-                    <div class="modal-detail-label">Status</div>
+                    <div class="modal-detail-label">Статус</div>
                     <div class="modal-detail-value">
-                        <span class="status-badge booked">BOOKED</span>
+                        <span class="status-badge booked">ЗАБРОНЬОВАНО</span>
                     </div>
                 </div>
                 <div class="modal-detail-row">
-                    <div class="modal-detail-label">Client Name</div>
+                    <div class="modal-detail-label">Ім'я клієнта</div>
                     <div class="modal-detail-value" id="modalName"></div>
                 </div>
                 <div class="modal-detail-row">
-                    <div class="modal-detail-label">Client Email</div>
+                    <div class="modal-detail-label">Email клієнта</div>
                     <div class="modal-detail-value" id="modalEmail"></div>
                 </div>
             </div>
@@ -1344,13 +1344,13 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
         function displayTimezone() {
             const tzInfo = document.getElementById('adminTimezoneInfo');
             if (tzInfo) {
-                tzInfo.textContent = '🌍 All times shown in: ' + userTimezone;
+                tzInfo.textContent = '🌍 Весь час показано у: ' + userTimezone;
             }
         }
 
         function formatDateTime(isoString) {
             const date = new Date(isoString);
-            return date.toLocaleString('en-US', {
+            return date.toLocaleString('uk-UA', {
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric',
@@ -1402,7 +1402,7 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
                 document.getElementById('slotsContainer').style.display = 'block';
             } catch (error) {
                 console.error('Error loading slots:', error);
-                showMessage('Failed to load slots. Please refresh the page.', 'error');
+                showMessage('Не вдалося завантажити слоти. Будь ласка, оновіть сторінку.', 'error');
                 document.getElementById('loading').style.display = 'none';
             }
         }
@@ -1442,7 +1442,7 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
                 : allSlots.filter(s => s.status === currentFilter);
 
             if (filteredSlots.length === 0) {
-                grid.innerHTML = '<div class="empty-state"><h3>No slots found</h3><p>Try adjusting your filter.</p></div>';
+                grid.innerHTML = '<div class="empty-state"><h3>Слотів не знайдено</h3><p>Спробуйте змінити фільтр.</p></div>';
                 return;
             }
 
@@ -1465,9 +1465,9 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
 
                 let actionsHTML = '';
                 if (slot.status === 'available') {
-                    actionsHTML = '<button class="action-btn block" onclick="event.stopPropagation(); blockSlot(\'' + slot.slot_time + '\')">Block</button>';
+                    actionsHTML = '<button class="action-btn block" onclick="event.stopPropagation(); blockSlot(\'' + slot.slot_time + '\')">Заблокувати</button>';
                 } else if (slot.status === 'blocked') {
-                    actionsHTML = '<button class="action-btn unblock" onclick="event.stopPropagation(); unblockSlot(\'' + slot.slot_time + '\')">Unblock</button>';
+                    actionsHTML = '<button class="action-btn unblock" onclick="event.stopPropagation(); unblockSlot(\'' + slot.slot_time + '\')">Розблокувати</button>';
                 }
 
                 slotCard.innerHTML =
@@ -1492,15 +1492,15 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
                 });
 
                 if (response.ok) {
-                    showMessage('Slot blocked successfully', 'success');
+                    showMessage('Слот успішно заблоковано', 'success');
                     await loadSlots();
                 } else {
                     const error = await response.text();
-                    showMessage('Failed to block slot: ' + error, 'error');
+                    showMessage('Не вдалося заблокувати слот: ' + error, 'error');
                 }
             } catch (error) {
                 console.error('Error blocking slot:', error);
-                showMessage('Failed to block slot. Please try again.', 'error');
+                showMessage('Не вдалося заблокувати слот. Будь ласка, спробуйте ще раз.', 'error');
             }
         }
 
@@ -1515,15 +1515,15 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
                 });
 
                 if (response.ok) {
-                    showMessage('Slot unblocked successfully', 'success');
+                    showMessage('Слот успішно розблоковано', 'success');
                     await loadSlots();
                 } else {
                     const error = await response.text();
-                    showMessage('Failed to unblock slot: ' + error, 'error');
+                    showMessage('Не вдалося розблокувати слот: ' + error, 'error');
                 }
             } catch (error) {
                 console.error('Error unblocking slot:', error);
-                showMessage('Failed to unblock slot. Please try again.', 'error');
+                showMessage('Не вдалося розблокувати слот. Будь ласка, спробуйте ще раз.', 'error');
             }
         }
 
