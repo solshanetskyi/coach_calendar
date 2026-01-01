@@ -167,9 +167,11 @@ When deploying to AWS (EC2, ECS, Lambda, etc.):
 
 ## Database
 
-The application uses SQLite with two main tables:
+The application uses SQLite (pure Go implementation via `modernc.org/sqlite`) with two main tables:
 - `bookings` - Stores booking information (slot_time, name, email, created_at, duration)
 - `blocked_slots` - Stores administratively blocked time slots
+
+**Note:** This version uses a pure Go SQLite driver that doesn't require CGO or C compiler, making it easy to deploy on any platform including AWS App Runner.
 
 ## Email Confirmations
 
