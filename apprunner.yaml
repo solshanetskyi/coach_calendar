@@ -1,7 +1,9 @@
 version: 1.0
 runtime: docker
 build:
-  dockerfile: Dockerfile
+  docker:
+    dockerfile: Dockerfile
+    context: .
 run:
   command: ./main
   network:

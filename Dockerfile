@@ -16,7 +16,7 @@ RUN go mod download
 COPY . .
 
 # Build the application with CGO enabled for SQLite
-RUN CGO_ENABLED=1 GOOS=linux go build -a -o main .
+RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags="-s -w" -o main .
 
 # Final stage
 FROM alpine:latest
