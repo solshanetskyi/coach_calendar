@@ -21,47 +21,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         :root {
-            /* Theme 1: Rose Garden (Default) */
-            --primary-start: #e63946;
-            --primary-end: #d62828;
-            --accent-color: #f77f00;
-            --gradient-bg: linear-gradient(135deg, #e63946 0%, #d62828 100%);
-        }
-
-        [data-theme="cherry-blossom"] {
-            /* Theme 2: Cherry Blossom */
-            --primary-start: #ff006e;
-            --primary-end: #fb5607;
-            --accent-color: #ffbe0b;
-            --gradient-bg: linear-gradient(135deg, #ff006e 0%, #fb5607 100%);
-        }
-
-        [data-theme="sunset-coral"] {
-            /* Theme 3: Sunset Coral */
-            --primary-start: #d00000;
-            --primary-end: #9d0208;
-            --accent-color: #dc2f02;
-            --gradient-bg: linear-gradient(135deg, #d00000 0%, #9d0208 100%);
-        }
-
-        [data-theme="berry-burst"] {
-            /* Theme 4: Berry Burst */
-            --primary-start: #c9184a;
-            --primary-end: #a4133c;
-            --accent-color: #ff4d6d;
-            --gradient-bg: linear-gradient(135deg, #c9184a 0%, #a4133c 100%);
-        }
-
-        [data-theme="pink-lemonade"] {
-            /* Theme 5: Pink Lemonade */
-            --primary-start: #ff758f;
-            --primary-end: #ff4d6d;
-            --accent-color: #ffccd5;
-            --gradient-bg: linear-gradient(135deg, #ff758f 0%, #ff4d6d 100%);
-        }
-
-        [data-theme="burgundy"] {
-            /* Theme 6: Burgundy */
+            /* Burgundy Theme */
             --primary-start: #800020;
             --primary-end: #5c0011;
             --accent-color: #a0153e;
@@ -421,84 +381,9 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         .theme-selector {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
+            display: none; /* Hidden - only Burgundy theme available */
         }
 
-        .theme-selector-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            font-weight: 600;
-        }
-
-        .theme-options {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .theme-btn {
-            padding: 8px 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
-
-        .theme-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .theme-btn.active {
-            background: rgba(255, 255, 255, 0.95);
-            color: var(--primary-start);
-            border-color: rgba(255, 255, 255, 0.95);
-        }
-
-        .theme-preview {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            vertical-align: middle;
-        }
-
-        .theme-preview.rose-garden {
-            background: linear-gradient(135deg, #e63946 0%, #d62828 100%);
-        }
-
-        .theme-preview.cherry-blossom {
-            background: linear-gradient(135deg, #ff006e 0%, #fb5607 100%);
-        }
-
-        .theme-preview.sunset-coral {
-            background: linear-gradient(135deg, #d00000 0%, #9d0208 100%);
-        }
-
-        .theme-preview.berry-burst {
-            background: linear-gradient(135deg, #c9184a 0%, #a4133c 100%);
-        }
-
-        .theme-preview.pink-lemonade {
-            background: linear-gradient(135deg, #ff758f 0%, #ff4d6d 100%);
-        }
-
-        .theme-preview.burgundy {
-            background: linear-gradient(135deg, #800020 0%, #5c0011 100%);
-        }
     </style>
 </head>
 <body>
@@ -971,35 +856,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
             }, 5000);
         }
 
-        // Theme management
-        function changeTheme(themeName) {
-            // Update body data-theme attribute
-            if (themeName === 'rose-garden') {
-                document.body.removeAttribute('data-theme');
-            } else {
-                document.body.setAttribute('data-theme', themeName);
-            }
-
-            // Update active button
-            document.querySelectorAll('.theme-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-theme') === themeName) {
-                    btn.classList.add('active');
-                }
-            });
-
-            // Save preference to localStorage
-            localStorage.setItem('selectedTheme', themeName);
-        }
-
-        // Load saved theme on page load
-        function loadSavedTheme() {
-            const savedTheme = localStorage.getItem('selectedTheme') || 'rose-garden';
-            changeTheme(savedTheme);
-        }
-
-        // Initialize page - load theme, display timezone and load slots
-        loadSavedTheme();
+        // Initialize page - display timezone and load slots
         displayTimezone();
         loadSlots();
     </script>
@@ -1026,47 +883,7 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         :root {
-            /* Theme 1: Rose Garden (Default) */
-            --primary-start: #e63946;
-            --primary-end: #d62828;
-            --accent-color: #f77f00;
-            --gradient-bg: linear-gradient(135deg, #e63946 0%, #d62828 100%);
-        }
-
-        [data-theme="cherry-blossom"] {
-            /* Theme 2: Cherry Blossom */
-            --primary-start: #ff006e;
-            --primary-end: #fb5607;
-            --accent-color: #ffbe0b;
-            --gradient-bg: linear-gradient(135deg, #ff006e 0%, #fb5607 100%);
-        }
-
-        [data-theme="sunset-coral"] {
-            /* Theme 3: Sunset Coral */
-            --primary-start: #d00000;
-            --primary-end: #9d0208;
-            --accent-color: #dc2f02;
-            --gradient-bg: linear-gradient(135deg, #d00000 0%, #9d0208 100%);
-        }
-
-        [data-theme="berry-burst"] {
-            /* Theme 4: Berry Burst */
-            --primary-start: #c9184a;
-            --primary-end: #a4133c;
-            --accent-color: #ff4d6d;
-            --gradient-bg: linear-gradient(135deg, #c9184a 0%, #a4133c 100%);
-        }
-
-        [data-theme="pink-lemonade"] {
-            /* Theme 5: Pink Lemonade */
-            --primary-start: #ff758f;
-            --primary-end: #ff4d6d;
-            --accent-color: #ffccd5;
-            --gradient-bg: linear-gradient(135deg, #ff758f 0%, #ff4d6d 100%);
-        }
-
-        [data-theme="burgundy"] {
-            /* Theme 6: Burgundy */
+            /* Burgundy Theme */
             --primary-start: #800020;
             --primary-end: #5c0011;
             --accent-color: #a0153e;
@@ -1486,84 +1303,9 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         .theme-selector {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
+            display: none; /* Hidden - only Burgundy theme available */
         }
 
-        .theme-selector-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            font-weight: 600;
-        }
-
-        .theme-options {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .theme-btn {
-            padding: 8px 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
-
-        .theme-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .theme-btn.active {
-            background: rgba(255, 255, 255, 0.95);
-            color: var(--primary-start);
-            border-color: rgba(255, 255, 255, 0.95);
-        }
-
-        .theme-preview {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            vertical-align: middle;
-        }
-
-        .theme-preview.rose-garden {
-            background: linear-gradient(135deg, #e63946 0%, #d62828 100%);
-        }
-
-        .theme-preview.cherry-blossom {
-            background: linear-gradient(135deg, #ff006e 0%, #fb5607 100%);
-        }
-
-        .theme-preview.sunset-coral {
-            background: linear-gradient(135deg, #d00000 0%, #9d0208 100%);
-        }
-
-        .theme-preview.berry-burst {
-            background: linear-gradient(135deg, #c9184a 0%, #a4133c 100%);
-        }
-
-        .theme-preview.pink-lemonade {
-            background: linear-gradient(135deg, #ff758f 0%, #ff4d6d 100%);
-        }
-
-        .theme-preview.burgundy {
-            background: linear-gradient(135deg, #800020 0%, #5c0011 100%);
-        }
     </style>
 </head>
 <body>
