@@ -60,6 +60,14 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
             --gradient-bg: linear-gradient(135deg, #ff758f 0%, #ff4d6d 100%);
         }
 
+        [data-theme="burgundy"] {
+            /* Theme 6: Burgundy */
+            --primary-start: #800020;
+            --primary-end: #5c0011;
+            --accent-color: #a0153e;
+            --gradient-bg: linear-gradient(135deg, #800020 0%, #5c0011 100%);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: var(--gradient-bg);
@@ -487,6 +495,10 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         .theme-preview.pink-lemonade {
             background: linear-gradient(135deg, #ff758f 0%, #ff4d6d 100%);
         }
+
+        .theme-preview.burgundy {
+            background: linear-gradient(135deg, #800020 0%, #5c0011 100%);
+        }
     </style>
 </head>
 <body>
@@ -516,6 +528,9 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
                     </button>
                     <button class="theme-btn" onclick="changeTheme('pink-lemonade')" data-theme="pink-lemonade">
                         <span class="theme-preview pink-lemonade"></span>Рожевий лимонад
+                    </button>
+                    <button class="theme-btn" onclick="changeTheme('burgundy')" data-theme="burgundy">
+                        <span class="theme-preview burgundy"></span>Бургунді
                     </button>
                 </div>
             </div>
@@ -1050,6 +1065,14 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
             --gradient-bg: linear-gradient(135deg, #ff758f 0%, #ff4d6d 100%);
         }
 
+        [data-theme="burgundy"] {
+            /* Theme 6: Burgundy */
+            --primary-start: #800020;
+            --primary-end: #5c0011;
+            --accent-color: #a0153e;
+            --gradient-bg: linear-gradient(135deg, #800020 0%, #5c0011 100%);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: var(--gradient-bg);
@@ -1537,6 +1560,10 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
         .theme-preview.pink-lemonade {
             background: linear-gradient(135deg, #ff758f 0%, #ff4d6d 100%);
         }
+
+        .theme-preview.burgundy {
+            background: linear-gradient(135deg, #800020 0%, #5c0011 100%);
+        }
     </style>
 </head>
 <body>
@@ -1563,6 +1590,9 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
                     </button>
                     <button class="theme-btn" onclick="changeTheme('pink-lemonade')" data-theme="pink-lemonade">
                         <span class="theme-preview pink-lemonade"></span>Рожевий лимонад
+                    </button>
+                    <button class="theme-btn" onclick="changeTheme('burgundy')" data-theme="burgundy">
+                        <span class="theme-preview burgundy"></span>Бургунді
                     </button>
                 </div>
             </div>
