@@ -12,12 +12,12 @@ import (
 )
 
 type EmailService struct {
-	SMTPHost     string
-	SMTPPort     string
-	From         string
-	FromName     string
-	Password     string
-	Enabled      bool
+	SMTPHost string
+	SMTPPort string
+	From     string
+	FromName string
+	Password string
+	Enabled  bool
 }
 
 func NewEmailService() *EmailService {
@@ -136,7 +136,7 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
 	googleCalURL := generateGoogleCalendarURL(slotTime)
 
 	// Create email subject and body
-	subject := "Підтвердження бронювання - Календар тренера"
+	subject := "Підтвердження онлайн-запису - безкоштовна консультація з Христина Івасюк"
 
 	// HTML body
 	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
@@ -159,8 +159,8 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
 <body>
     <div class="container">
         <div class="header">
-            <h1>Підтвердження бронювання</h1>
-            <p>Календар тренера</p>
+            <h1>Підтвердження онлайн-запису</h1>
+            <p>Безкоштовна консультація з Христина Івасюк</p>
         </div>
         <div class="content">
             <p>Вітаємо, <strong>%s</strong>!</p>
@@ -188,11 +188,11 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
             </div>
 
             <p>Будь ласка, приходьте вчасно на вашу зустріч.</p>
-            <p>Якщо вам потрібно скасувати або перенести зустріч, будь ласка, зв'яжіться з нами якнайшвидше.</p>
+            <p>Якщо вам потрібно скасувати або перенести зустріч, будь ласка, зв'яжіться зі мною якнайшвидше.</p>
 
             <p style="margin-top: 30px;">
                 З повагою,<br>
-                <strong>Команда Календар тренера</strong>
+                <strong>Христина Івасюк</strong>
             </p>
         </div>
         <div class="footer">
@@ -214,7 +214,7 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
 
 	textBody := fmt.Sprintf(`Вітаємо, %s!
 
-Дякуємо за бронювання зустрічі!
+Дякую за бронювання зустрічі!
 
 Деталі зустрічі:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -230,10 +230,10 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
 
 Будь ласка, приходьте вчасно на вашу зустріч.
 
-Якщо вам потрібно скасувати або перенести зустріч, будь ласка, зв'яжіться з нами якнайшвидше.
+Якщо вам потрібно скасувати або перенести зустріч, будь ласка, зв'яжіться зі мною якнайшвидше.
 
 З повагою,
-Команда Календар тренера
+Христина Івасюк
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Це автоматичне повідомлення. Будь ласка, не відповідайте на цей email.

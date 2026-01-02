@@ -12,7 +12,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Бронювання зустрічі - Календар тренера</title>
+    <title>Безкоштовна консультація з Христина Івасюк</title>
     <style>
         * {
             margin: 0;
@@ -866,7 +866,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, html)
 }
 
-
 func AdminHandler(w http.ResponseWriter, r *http.Request) {
 	html := `
 <!DOCTYPE html>
@@ -1648,7 +1647,6 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
 `
 	fmt.Fprint(w, html)
 }
-
 
 func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
