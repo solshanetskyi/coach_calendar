@@ -163,17 +163,14 @@ func (h *APIHandlers) CreateBooking(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var zoomLink string = "adfdasf"
-
-	// // Create Zoom meeting
-	// var zoomLink string
-	// if h.ZoomService != nil {
-	// 	zoomLink, err = h.ZoomService.CreateMeeting(req.Name, req.Email, slotTime)
-	// 	if err != nil {
-	// 		// Log the error but don't fail the booking
-	// 		log.Printf("Warning: Booking created but failed to create Zoom meeting: %v", err)
-	// 	}
-	// }
+	var zoomLink string
+	if h.ZoomService != nil {
+		zoomLink, err = h.ZoomService.CreateMeeting(req.Name, req.Email, slotTime)
+		if err != nil {
+			// Log the error but don't fail the booking
+			log.Printf("Warning: Booking created but failed to create Zoom meeting: %v", err)
+		}
+	}
 
 	// Send confirmation email
 	if h.EmailService != nil {

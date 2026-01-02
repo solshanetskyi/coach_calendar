@@ -12,11 +12,12 @@ import (
 )
 
 type EmailService struct {
-	SMTPHost string
-	SMTPPort string
-	From     string
-	Password string
-	Enabled  bool
+	SMTPHost     string
+	SMTPPort     string
+	From         string
+	FromName     string
+	Password     string
+	Enabled      bool
 }
 
 func NewEmailService() *EmailService {
@@ -26,20 +27,26 @@ func NewEmailService() *EmailService {
 	from := os.Getenv("SMTP_FROM")
 	password := os.Getenv("SMTP_PASSWORD")
 
+	// User-friendly "From" name with default
+	fromName := os.Getenv("SMTP_USER_FRIENDLY_FROM")
+	if fromName == "" {
+		fromName = "Христина Івасюк"
+	}
+
 	enabled := host != "" && port != "" && from != "" && password != ""
 
 	if !enabled {
 		log.Println("Email service disabled - SMTP configuration not found")
 		log.Println("To enable SMTP email confirmations, set: SMTP_HOST, SMTP_PORT, SMTP_FROM, SMTP_PASSWORD")
 	} else {
-		log.Println("Email service enabled using SMTP")
-		log.Println("Email from %s", from)
+		log.Printf("Email service enabled using SMTP (from: %s <%s>)", fromName, from)
 	}
 
 	return &EmailService{
 		SMTPHost: host,
 		SMTPPort: port,
 		From:     from,
+		FromName: fromName,
 		Password: password,
 		Enabled:  enabled,
 	}
@@ -246,8 +253,9 @@ func (e *EmailService) sendViaSMTP(toEmail, subject, htmlBody, textBody, icalCon
 
 	// Build multipart email with HTML, text fallback, and calendar attachment
 	var message strings.Builder
-	message.WriteString(fmt.Sprintf("From: %s\r\n", "Seregka"))
-	log.Printf(e.From)
+	// Use RFC 5322 format with base64-encoded UTF-8 display name
+	encodedFromName := base64.StdEncoding.EncodeToString([]byte(e.FromName))
+	message.WriteString(fmt.Sprintf("From: =?UTF-8?B?%s?= <%s>\r\n", encodedFromName, e.From))
 	message.WriteString(fmt.Sprintf("To: %s\r\n", toEmail))
 	message.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))
 	message.WriteString("MIME-Version: 1.0\r\n")
