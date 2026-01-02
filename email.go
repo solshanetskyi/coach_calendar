@@ -33,6 +33,7 @@ func NewEmailService() *EmailService {
 		log.Println("To enable SMTP email confirmations, set: SMTP_HOST, SMTP_PORT, SMTP_FROM, SMTP_PASSWORD")
 	} else {
 		log.Println("Email service enabled using SMTP")
+		log.Println("Email from %s", from)
 	}
 
 	return &EmailService{
@@ -245,7 +246,8 @@ func (e *EmailService) sendViaSMTP(toEmail, subject, htmlBody, textBody, icalCon
 
 	// Build multipart email with HTML, text fallback, and calendar attachment
 	var message strings.Builder
-	message.WriteString(fmt.Sprintf("From: %s\r\n", e.From))
+	message.WriteString(fmt.Sprintf("From: %s\r\n", "Seregka"))
+	log.Printf(e.From)
 	message.WriteString(fmt.Sprintf("To: %s\r\n", toEmail))
 	message.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))
 	message.WriteString("MIME-Version: 1.0\r\n")
