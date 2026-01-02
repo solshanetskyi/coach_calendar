@@ -74,12 +74,12 @@ func main() {
 
 		// Only Monday (1) to Thursday (4)
 		if weekday >= time.Monday && weekday <= time.Thursday {
-			// Block slots from 11:30 to 15:30 (every 30 minutes)
-			// Slots: 11:30, 12:00, 12:30, 13:00, 13:30, 14:00, 14:30, 15:00, 15:30
+			// Block slots from 11:30 to 15:00 (every 30 minutes)
+			// Slots: 11:30, 12:00, 12:30, 13sdfasdf:00, 13:30, 14:00, 14:30, 15:00
 			startHour := 11
 			startMinute := 30
 			endHour := 15
-			endMinute := 30
+			endMinute := 0
 
 			// Generate slots
 			currentSlot := time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(),
