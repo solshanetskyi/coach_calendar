@@ -21,7 +21,8 @@
       "Bash(git merge:*)",
       "Bash(docker build:*)",
       "Bash(git rm:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(go doc:*)"
     ],
     "deny": [],
     "ask": []

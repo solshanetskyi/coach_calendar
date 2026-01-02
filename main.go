@@ -31,13 +31,16 @@ func main() {
 	// Initialize email service
 	emailService := NewEmailService()
 
+	// Initialize Zoom service
+	zoomService := NewZoomService()
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
 	// Initialize API handlers
-	apiHandlers := handlers.NewAPIHandlers(db, generateSlotsForHandlers, emailService)
+	apiHandlers := handlers.NewAPIHandlers(db, generateSlotsForHandlers, emailService, zoomService)
 
 	// Register page routes
 	http.HandleFunc("/", handlers.HomeHandler)

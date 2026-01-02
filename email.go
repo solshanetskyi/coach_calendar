@@ -44,6 +44,24 @@ func NewEmailService() *EmailService {
 	}
 }
 
+// getZoomSection returns the HTML for the Zoom meeting section, or empty string if no link
+func getZoomSection(zoomLink string) string {
+	if zoomLink == "" {
+		return ""
+	}
+
+	return fmt.Sprintf(`
+            <div class="calendar-section" style="background: #e3f2fd; border-left: 4px solid #2D8CFF;">
+                <h3>🎥 Онлайн зустріч Zoom:</h3>
+                <p>
+                    <a href="%s" class="btn" target="_blank" style="display: inline-block; padding: 12px 24px; background: #2D8CFF; color: #ffffff !important; text-decoration: none; border-radius: 6px; margin: 10px;">Приєднатися до Zoom</a>
+                </p>
+                <p style="font-size: 14px; color: #666;">
+                    Посилання на зустріч буде активне за 10 хвилин до початку
+                </p>
+            </div>`, zoomLink)
+}
+
 // generateGoogleCalendarURL creates a Google Calendar event URL
 func generateGoogleCalendarURL(slotTime time.Time) string {
 	endTime := slotTime.Add(30 * time.Minute)
@@ -97,7 +115,7 @@ END:VCALENDAR`, eventID, now, startUTC, endUTC, name, name, email)
 	return ical
 }
 
-func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time.Time) error {
+func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time.Time, zoomLink string) error {
 	if !e.Enabled {
 		log.Printf("Email service disabled - skipping confirmation email to %s", email)
 		return nil
@@ -125,8 +143,8 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
         .details { background: white; padding: 20px; border-left: 4px solid #800020; margin: 20px 0; }
         .detail-row { margin: 10px 0; }
         .calendar-section { background: white; padding: 20px; margin: 20px 0; text-align: center; border-radius: 8px; }
-        .btn { display: inline-block; padding: 12px 24px; background: #800020; color: white; text-decoration: none; border-radius: 6px; margin: 10px; }
-        .btn:hover { background: #5c0011; }
+        .btn { display: inline-block; padding: 12px 24px; background: #800020; color: white !important; text-decoration: none; border-radius: 6px; margin: 10px; }
+        .btn:hover { background: #5c0011; color: white !important; }
         .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; }
     </style>
 </head>
@@ -148,10 +166,12 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
                 <div class="detail-row">📧 <strong>Email:</strong> %s</div>
             </div>
 
+            %s
+
             <div class="calendar-section">
                 <h3>📅 Додати до календаря:</h3>
                 <p>
-                    <a href="%s" class="btn" target="_blank">Додати в Google Calendar</a>
+                    <a href="%s" class="btn" target="_blank" style="display: inline-block; padding: 12px 24px; background: #800020; color: #ffffff !important; text-decoration: none; border-radius: 6px; margin: 10px;">Додати в Google Calendar</a>
                 </p>
                 <p style="font-size: 14px; color: #666;">
                     Або відкрийте прикріплений файл invite.ics для інших календарів
@@ -172,9 +192,18 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
         </div>
     </div>
 </body>
-</html>`, name, formattedTime, name, email, googleCalURL)
+</html>`, name, formattedTime, name, email, getZoomSection(zoomLink), googleCalURL)
 
 	// Plain text fallback
+	zoomText := ""
+	if zoomLink != "" {
+		zoomText = fmt.Sprintf(`
+🎥 Онлайн зустріч Zoom:
+%s
+
+`, zoomLink)
+	}
+
 	textBody := fmt.Sprintf(`Вітаємо, %s!
 
 Дякуємо за бронювання зустрічі!
@@ -185,7 +214,7 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
 ⏱️ Тривалість: 30 хвилин
 👤 Ім'я: %s
 📧 Email: %s
-
+%s
 📅 Додати до календаря:
 %s
 
@@ -200,7 +229,7 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Це автоматичне повідомлення. Будь ласка, не відповідайте на цей email.
-`, name, formattedTime, name, email, googleCalURL)
+`, name, formattedTime, name, email, zoomText, googleCalURL)
 
 	// Generate iCalendar attachment
 	icalContent := generateICalendar(name, email, slotTime)

@@ -10,7 +10,12 @@ import (
 
 // EmailSender interface for sending emails
 type EmailSender interface {
-	SendBookingConfirmation(name, email string, slotTime time.Time) error
+	SendBookingConfirmation(name, email string, slotTime time.Time, zoomLink string) error
+}
+
+// ZoomMeetingCreator interface for creating Zoom meetings
+type ZoomMeetingCreator interface {
+	CreateMeeting(name, email string, slotTime time.Time) (string, error)
 }
 
 // Re-export types from main package
@@ -46,13 +51,15 @@ type APIHandlers struct {
 	DB                     *sql.DB
 	GenerateAvailableSlots GenerateSlotsFn
 	EmailService           EmailSender
+	ZoomService            ZoomMeetingCreator
 }
 
-func NewAPIHandlers(db *sql.DB, generateSlotsFn GenerateSlotsFn, emailService EmailSender) *APIHandlers {
+func NewAPIHandlers(db *sql.DB, generateSlotsFn GenerateSlotsFn, emailService EmailSender, zoomService ZoomMeetingCreator) *APIHandlers {
 	return &APIHandlers{
 		DB:                     db,
 		GenerateAvailableSlots: generateSlotsFn,
 		EmailService:           emailService,
+		ZoomService:            zoomService,
 	}
 }
 
@@ -156,9 +163,19 @@ func (h *APIHandlers) CreateBooking(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create Zoom meeting
+	var zoomLink string
+	if h.ZoomService != nil {
+		zoomLink, err = h.ZoomService.CreateMeeting(req.Name, req.Email, slotTime)
+		if err != nil {
+			// Log the error but don't fail the booking
+			log.Printf("Warning: Booking created but failed to create Zoom meeting: %v", err)
+		}
+	}
+
 	// Send confirmation email
 	if h.EmailService != nil {
-		err = h.EmailService.SendBookingConfirmation(req.Name, req.Email, slotTime)
+		err = h.EmailService.SendBookingConfirmation(req.Name, req.Email, slotTime, zoomLink)
 		if err != nil {
 			// Log the error but don't fail the booking
 			log.Printf("Warning: Booking created but failed to send confirmation email: %v", err)
