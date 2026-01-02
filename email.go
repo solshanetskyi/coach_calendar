@@ -9,90 +9,52 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ses"
 )
 
 type EmailService struct {
-	SMTPHost  string
-	SMTPPort  string
-	From      string
-	Password  string
-	UseAWSSES bool
-	SESClient *ses.SES
-	AWSRegion string
-	Enabled   bool
+	SMTPHost string
+	SMTPPort string
+	From     string
+	Password string
+	Enabled  bool
 }
 
 func NewEmailService() *EmailService {
-	// Check if AWS SES should be used
-	useAWSSES := os.Getenv("USE_AWS_SES") == "true"
-	from := os.Getenv("SMTP_FROM") // Used for both SMTP and SES
+	// SMTP Configuration
+	host := os.Getenv("SMTP_HOST")
+	port := os.Getenv("SMTP_PORT")
+	from := os.Getenv("SMTP_FROM")
+	password := os.Getenv("SMTP_PASSWORD")
 
-	var sesClient *ses.SES
-	var awsRegion string
-	var enabled bool
+	enabled := host != "" && port != "" && from != "" && password != ""
 
-	if useAWSSES {
-		// AWS SES Configuration
-		awsRegion = os.Getenv("AWS_REGION")
-		if awsRegion == "" {
-			awsRegion = "us-east-1" // Default region
-		}
-
-		if from == "" {
-			log.Println("Email service disabled - SMTP_FROM not configured")
-			log.Println("To enable AWS SES email confirmations, set: USE_AWS_SES=true, SMTP_FROM, AWS_REGION")
-			enabled = false
-		} else {
-			// Create AWS session
-			sess, err := session.NewSession(&aws.Config{
-				Region: aws.String(awsRegion),
-			})
-			if err != nil {
-				log.Printf("Failed to create AWS session: %v", err)
-				log.Println("Email service disabled - AWS session creation failed")
-				enabled = false
-			} else {
-				sesClient = ses.New(sess)
-				enabled = true
-				log.Printf("Email service enabled using AWS SES in region: %s", awsRegion)
-			}
-		}
+	if !enabled {
+		log.Println("Email service disabled - SMTP configuration not found")
+		log.Println("To enable SMTP email confirmations, set: SMTP_HOST, SMTP_PORT, SMTP_FROM, SMTP_PASSWORD")
 	} else {
-		// SMTP Configuration
-		host := os.Getenv("SMTP_HOST")
-		port := os.Getenv("SMTP_PORT")
-		password := os.Getenv("SMTP_PASSWORD")
-
-		enabled = host != "" && port != "" && from != "" && password != ""
-
-		if !enabled {
-			log.Println("Email service disabled - SMTP configuration not found")
-			log.Println("To enable SMTP email confirmations, set: SMTP_HOST, SMTP_PORT, SMTP_FROM, SMTP_PASSWORD")
-			log.Println("To enable AWS SES email confirmations, set: USE_AWS_SES=true, SMTP_FROM, AWS_REGION")
-		} else {
-			log.Println("Email service enabled using SMTP")
-		}
-
-		return &EmailService{
-			SMTPHost: host,
-			SMTPPort: port,
-			From:     from,
-			Password: password,
-			Enabled:  enabled,
-		}
+		log.Println("Email service enabled using SMTP")
 	}
 
 	return &EmailService{
-		From:      from,
-		UseAWSSES: useAWSSES,
-		SESClient: sesClient,
-		AWSRegion: awsRegion,
-		Enabled:   enabled,
+		SMTPHost: host,
+		SMTPPort: port,
+		From:     from,
+		Password: password,
+		Enabled:  enabled,
 	}
+}
+
+// generateGoogleCalendarURL creates a Google Calendar event URL
+func generateGoogleCalendarURL(slotTime time.Time) string {
+	endTime := slotTime.Add(30 * time.Minute)
+	startUTC := slotTime.UTC().Format("20060102T150405Z")
+	endUTC := endTime.UTC().Format("20060102T150405Z")
+	url := fmt.Sprintf("https://calendar.google.com/calendar/render?action=TEMPLATE&text=%s&dates=%s/%s",
+		"Coaching+Session",
+		startUTC,
+		endUTC,
+	)
+	return url
 }
 
 // generateICalendar creates an iCalendar (ICS) format string for the appointment
@@ -144,114 +106,157 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
 	// Format the booking time
 	formattedTime := slotTime.Format("Monday, January 2, 2006 at 3:04 PM MST")
 
+	// Generate Google Calendar URL
+	googleCalURL := generateGoogleCalendarURL(slotTime)
+
 	// Create email subject and body
-	subject := "Booking Confirmation - Coach Calendar"
-	body := fmt.Sprintf(`Hello %s,
+	subject := "Підтвердження бронювання - Календар тренера"
 
-Thank you for booking an appointment!
+	// HTML body
+	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #800020 0%%, #5c0011 100%%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
+        .details { background: white; padding: 20px; border-left: 4px solid #800020; margin: 20px 0; }
+        .detail-row { margin: 10px 0; }
+        .calendar-section { background: white; padding: 20px; margin: 20px 0; text-align: center; border-radius: 8px; }
+        .btn { display: inline-block; padding: 12px 24px; background: #800020; color: white; text-decoration: none; border-radius: 6px; margin: 10px; }
+        .btn:hover { background: #5c0011; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Підтвердження бронювання</h1>
+            <p>Календар тренера</p>
+        </div>
+        <div class="content">
+            <p>Вітаємо, <strong>%s</strong>!</p>
+            <p>Дякуємо за бронювання зустрічі!</p>
 
-Appointment Details:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📅 Date & Time: %s
-⏱️  Duration: 30 minutes
-👤 Name: %s
+            <div class="details">
+                <h3>Деталі зустрічі:</h3>
+                <div class="detail-row">📅 <strong>Дата і час:</strong> %s</div>
+                <div class="detail-row">⏱️ <strong>Тривалість:</strong> 30 хвилин</div>
+                <div class="detail-row">👤 <strong>Ім'я:</strong> %s</div>
+                <div class="detail-row">📧 <strong>Email:</strong> %s</div>
+            </div>
+
+            <div class="calendar-section">
+                <h3>📅 Додати до календаря:</h3>
+                <p>
+                    <a href="%s" class="btn" target="_blank">Додати в Google Calendar</a>
+                </p>
+                <p style="font-size: 14px; color: #666;">
+                    Або відкрийте прикріплений файл invite.ics для інших календарів
+                    <br>(Outlook, Apple Calendar тощо)
+                </p>
+            </div>
+
+            <p>Будь ласка, приходьте вчасно на вашу зустріч.</p>
+            <p>Якщо вам потрібно скасувати або перенести зустріч, будь ласка, зв'яжіться з нами якнайшвидше.</p>
+
+            <p style="margin-top: 30px;">
+                З повагою,<br>
+                <strong>Команда Календар тренера</strong>
+            </p>
+        </div>
+        <div class="footer">
+            Це автоматичне повідомлення. Будь ласка, не відповідайте на цей email.
+        </div>
+    </div>
+</body>
+</html>`, name, formattedTime, name, email, googleCalURL)
+
+	// Plain text fallback
+	textBody := fmt.Sprintf(`Вітаємо, %s!
+
+Дякуємо за бронювання зустрічі!
+
+Деталі зустрічі:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 Дата і час: %s
+⏱️ Тривалість: 30 хвилин
+👤 Ім'я: %s
 📧 Email: %s
 
-A calendar invitation is attached to this email. You can add this appointment to your calendar by opening the attachment.
+📅 Додати до календаря:
+%s
 
-Please make sure to arrive on time for your appointment.
+Або відкрийте прикріплений файл invite.ics для інших календарів.
 
-If you need to cancel or reschedule, please contact us as soon as possible.
+Будь ласка, приходьте вчасно на вашу зустріч.
 
-Best regards,
-Coach Calendar Team
+Якщо вам потрібно скасувати або перенести зустріч, будь ласка, зв'яжіться з нами якнайшвидше.
+
+З повагою,
+Команда Календар тренера
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-This is an automated message. Please do not reply to this email.
-`, name, formattedTime, name, email)
+Це автоматичне повідомлення. Будь ласка, не відповідайте на цей email.
+`, name, formattedTime, name, email, googleCalURL)
 
 	// Generate iCalendar attachment
 	icalContent := generateICalendar(name, email, slotTime)
 
-	// Send via AWS SES or SMTP
-	if e.UseAWSSES {
-		return e.sendViaSES(email, subject, body, icalContent)
-	}
-	return e.sendViaSMTP(email, subject, body, icalContent)
+	// Send via SMTP
+	return e.sendViaSMTP(email, subject, htmlBody, textBody, icalContent)
 }
 
-func (e *EmailService) sendViaSES(toEmail, subject, body, icalContent string) error {
-	// Create boundary for multipart message
-	boundary := fmt.Sprintf("boundary_%d", rand.Int63())
+func (e *EmailService) sendViaSMTP(toEmail, subject, htmlBody, textBody, icalContent string) error {
+	// Create boundaries for multipart message
+	mixedBoundary := fmt.Sprintf("mixed_boundary_%d", rand.Int63())
+	altBoundary := fmt.Sprintf("alt_boundary_%d", rand.Int63())
 
-	// Build raw email message with attachment
-	rawMessage := fmt.Sprintf(`From: %s
-To: %s
-Subject: %s
-MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="%s"
-
---%s
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-
-%s
-
---%s
-Content-Type: text/calendar; charset=UTF-8; method=REQUEST; name="invite.ics"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="invite.ics"
-
-%s
---%s--`, e.From, toEmail, subject, boundary, boundary, body, boundary, base64.StdEncoding.EncodeToString([]byte(icalContent)), boundary)
-
-	// Send raw email via SES
-	input := &ses.SendRawEmailInput{
-		RawMessage: &ses.RawMessage{
-			Data: []byte(rawMessage),
-		},
-	}
-
-	result, err := e.SESClient.SendRawEmail(input)
-	if err != nil {
-		log.Printf("Failed to send confirmation email via AWS SES to %s: %v", toEmail, err)
-		return fmt.Errorf("failed to send confirmation email via AWS SES: %w", err)
-	}
-
-	log.Printf("Confirmation email sent successfully via AWS SES to %s (MessageId: %s)", toEmail, *result.MessageId)
-	return nil
-}
-
-func (e *EmailService) sendViaSMTP(toEmail, subject, body, icalContent string) error {
-	// Create boundary for multipart message
-	boundary := fmt.Sprintf("boundary_%d", rand.Int63())
-
-	// Build multipart email with calendar attachment
+	// Build multipart email with HTML, text fallback, and calendar attachment
 	var message strings.Builder
 	message.WriteString(fmt.Sprintf("From: %s\r\n", e.From))
 	message.WriteString(fmt.Sprintf("To: %s\r\n", toEmail))
 	message.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))
 	message.WriteString("MIME-Version: 1.0\r\n")
-	message.WriteString(fmt.Sprintf("Content-Type: multipart/mixed; boundary=\"%s\"\r\n", boundary))
+	message.WriteString(fmt.Sprintf("Content-Type: multipart/mixed; boundary=\"%s\"\r\n", mixedBoundary))
 	message.WriteString("\r\n")
 
-	// Text body part
-	message.WriteString(fmt.Sprintf("--%s\r\n", boundary))
+	// Start multipart/alternative section for HTML and text
+	message.WriteString(fmt.Sprintf("--%s\r\n", mixedBoundary))
+	message.WriteString(fmt.Sprintf("Content-Type: multipart/alternative; boundary=\"%s\"\r\n", altBoundary))
+	message.WriteString("\r\n")
+
+	// Plain text version
+	message.WriteString(fmt.Sprintf("--%s\r\n", altBoundary))
 	message.WriteString("Content-Type: text/plain; charset=UTF-8\r\n")
 	message.WriteString("Content-Transfer-Encoding: 7bit\r\n")
 	message.WriteString("\r\n")
-	message.WriteString(body)
+	message.WriteString(textBody)
 	message.WriteString("\r\n\r\n")
 
+	// HTML version
+	message.WriteString(fmt.Sprintf("--%s\r\n", altBoundary))
+	message.WriteString("Content-Type: text/html; charset=UTF-8\r\n")
+	message.WriteString("Content-Transfer-Encoding: 7bit\r\n")
+	message.WriteString("\r\n")
+	message.WriteString(htmlBody)
+	message.WriteString("\r\n\r\n")
+
+	// End multipart/alternative section
+	message.WriteString(fmt.Sprintf("--%s--\r\n", altBoundary))
+	message.WriteString("\r\n")
+
 	// Calendar attachment part
-	message.WriteString(fmt.Sprintf("--%s\r\n", boundary))
+	message.WriteString(fmt.Sprintf("--%s\r\n", mixedBoundary))
 	message.WriteString("Content-Type: text/calendar; charset=UTF-8; method=REQUEST; name=\"invite.ics\"\r\n")
 	message.WriteString("Content-Transfer-Encoding: base64\r\n")
 	message.WriteString("Content-Disposition: attachment; filename=\"invite.ics\"\r\n")
 	message.WriteString("\r\n")
 	message.WriteString(base64.StdEncoding.EncodeToString([]byte(icalContent)))
 	message.WriteString("\r\n")
-	message.WriteString(fmt.Sprintf("--%s--\r\n", boundary))
+	message.WriteString(fmt.Sprintf("--%s--\r\n", mixedBoundary))
 
 	// Set up authentication
 	auth := smtp.PlainAuth("", e.From, e.Password, e.SMTPHost)
