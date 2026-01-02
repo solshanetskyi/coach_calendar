@@ -22,7 +22,10 @@
       "Bash(docker build:*)",
       "Bash(git rm:*)",
       "Bash(git push:*)",
-      "Bash(go doc:*)"
+      "Bash(go doc:*)",
+      "Bash(make help:*)",
+      "Bash(make block-slots-dry:*)",
+      "Bash(make build:*)"
     ],
     "deny": [],
     "ask": []

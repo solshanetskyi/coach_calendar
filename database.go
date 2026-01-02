@@ -46,7 +46,15 @@ func initDB() error {
 
 func generateAvailableSlots() []AvailableSlot {
 	slots := []AvailableSlot{}
-	now := time.Now()
+
+	// Load Amsterdam timezone for consistency with booking system
+	location, err := time.LoadLocation("Europe/Amsterdam")
+	if err != nil {
+		// Fallback to UTC if Amsterdam timezone not available
+		location = time.UTC
+	}
+
+	now := time.Now().In(location)
 
 	// Only generate slots for January
 	// Find the next January (could be current year or next year)
@@ -64,7 +72,7 @@ func generateAvailableSlots() []AvailableSlot {
 
 	// Generate slots for all days in January
 	for day := 1; day <= 31; day++ {
-		// Generate 30-minute slots from 9 AM to 5 PM
+		// Generate 30-minute slots from 9 AM to 5 PM (Amsterdam time)
 		for hour := 9; hour <= 16; hour++ {
 			for minute := 0; minute < 60; minute += 30 {
 				// Skip the 30-minute slot at 4:30 PM to keep end time at 5 PM
@@ -72,7 +80,7 @@ func generateAvailableSlots() []AvailableSlot {
 					continue
 				}
 
-				slotTime := time.Date(januaryYear, time.January, day, hour, minute, 0, 0, time.UTC)
+				slotTime := time.Date(januaryYear, time.January, day, hour, minute, 0, 0, location)
 
 				// Only include future slots
 				if slotTime.After(now) {

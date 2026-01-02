@@ -3,8 +3,10 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -298,10 +300,11 @@ func (h *APIHandlers) BlockSlot(w http.ResponseWriter, r *http.Request) {
 	// Insert blocked slot
 	_, err = h.DB.Exec("INSERT INTO blocked_slots (slot_time) VALUES (?)", slotTime)
 	if err != nil {
-		if err.Error() == "UNIQUE constraint failed: blocked_slots.slot_time" {
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "UNIQUE constraint failed") || strings.Contains(errMsg, "blocked_slots.slot_time") {
 			http.Error(w, "Slot already blocked", http.StatusConflict)
 		} else {
-			http.Error(w, "Failed to block slot", http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("Failed to block slot: %v", err), http.StatusInternalServerError)
 			log.Printf("Error blocking slot: %v", err)
 		}
 		return
