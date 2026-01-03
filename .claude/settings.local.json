@@ -25,7 +25,13 @@
       "Bash(go doc:*)",
       "Bash(make help:*)",
       "Bash(make block-slots-dry:*)",
-      "Bash(make build:*)"
+      "Bash(make build:*)",
+      "Bash(git checkout:*)",
+      "Bash(aws:*)",
+      "Bash(chmod:*)",
+      "Bash(./verify_production.sh:*)",
+      "Bash(cat:*)",
+      "Bash(/tmp/check_unix.go <<'EOF'\npackage main\nimport \\(\"fmt\"; \"time\"\\)\nfunc main\\(\\) {\n    // What the DB should have: Jan 5, 2026, 11:30 AM CET \\(+01:00\\)\n    loc, _ := time.LoadLocation\\(\"Europe/Amsterdam\"\\)\n    correct := time.Date\\(2026, 1, 5, 11, 30, 0, 0, loc\\)\n    fmt.Printf\\(\"Correct time: %s\\\\n\", correct.Format\\(time.RFC3339\\)\\)\n    fmt.Printf\\(\"Correct Unix: %d\\\\n\", correct.Unix\\(\\)\\)\n    \n    // What Go is reading: Jan 1, 2026, 12:30 PM UTC\n    wrong := time.Date\\(2026, 1, 1, 12, 30, 0, 0, time.UTC\\)\n    fmt.Printf\\(\"\\\\nWhat Go reads: %s\\\\n\", wrong.Format\\(time.RFC3339\\)\\)\n    fmt.Printf\\(\"Wrong Unix: %d\\\\n\", wrong.Unix\\(\\)\\)\n}\nEOF)"
     ],
     "deny": [],
     "ask": []

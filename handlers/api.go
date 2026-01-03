@@ -156,10 +156,13 @@ func (h *APIHandlers) CreateBooking(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Insert booking into database
+	// Convert to UTC for consistent storage
+	slotTimeUTC := slotTime.UTC()
+
+	// Insert booking into database (store in UTC)
 	_, err = h.DB.Exec(
 		"INSERT INTO bookings (slot_time, name, email) VALUES (?, ?, ?)",
-		slotTime, req.Name, req.Email,
+		slotTimeUTC, req.Name, req.Email,
 	)
 	if err != nil {
 		if err.Error() == "UNIQUE constraint failed: bookings.slot_time" {
@@ -296,9 +299,12 @@ func (h *APIHandlers) BlockSlot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Convert to UTC for consistent storage (SQLite driver doesn't handle timezones well)
+	slotTimeUTC := slotTime.UTC()
+
 	// Check if slot is already booked
 	var count int
-	err = h.DB.QueryRow("SELECT COUNT(*) FROM bookings WHERE slot_time = ?", slotTime).Scan(&count)
+	err = h.DB.QueryRow("SELECT COUNT(*) FROM bookings WHERE slot_time = ?", slotTimeUTC).Scan(&count)
 	if err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		log.Printf("Error checking booking: %v", err)
@@ -310,8 +316,8 @@ func (h *APIHandlers) BlockSlot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Insert blocked slot
-	_, err = h.DB.Exec("INSERT INTO blocked_slots (slot_time) VALUES (?)", slotTime)
+	// Insert blocked slot (store in UTC)
+	_, err = h.DB.Exec("INSERT INTO blocked_slots (slot_time) VALUES (?)", slotTimeUTC)
 	if err != nil {
 		errMsg := err.Error()
 		if strings.Contains(errMsg, "UNIQUE constraint failed") || strings.Contains(errMsg, "blocked_slots.slot_time") {
@@ -351,8 +357,11 @@ func (h *APIHandlers) UnblockSlot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Convert to UTC (database stores times in UTC)
+	slotTimeUTC := slotTime.UTC()
+
 	// Delete blocked slot
-	result, err := h.DB.Exec("DELETE FROM blocked_slots WHERE slot_time = ?", slotTime)
+	result, err := h.DB.Exec("DELETE FROM blocked_slots WHERE slot_time = ?", slotTimeUTC)
 	if err != nil {
 		http.Error(w, "Failed to unblock slot", http.StatusInternalServerError)
 		log.Printf("Error unblocking slot: %v", err)
@@ -369,4 +378,42 @@ func (h *APIHandlers) UnblockSlot(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Slot unblocked successfully",
 	})
+}
+
+func (h *APIHandlers) DebugBlockedSlots(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	type DebugInfo struct {
+		SlotTimeRaw     string `json:"slot_time_raw"`
+		SlotTimeUnix    int64  `json:"slot_time_unix"`
+		SlotTimeRFC3339 string `json:"slot_time_rfc3339"`
+		Location        string `json:"location"`
+	}
+
+	rows, err := h.DB.Query("SELECT slot_time FROM blocked_slots WHERE slot_time LIKE '2026-%' LIMIT 20")
+	if err != nil {
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var debugInfo []DebugInfo
+	for rows.Next() {
+		var slotTime time.Time
+		if err := rows.Scan(&slotTime); err != nil {
+			continue
+		}
+		debugInfo = append(debugInfo, DebugInfo{
+			SlotTimeRaw:     slotTime.String(),
+			SlotTimeUnix:    slotTime.Unix(),
+			SlotTimeRFC3339: slotTime.Format(time.RFC3339),
+			Location:        slotTime.Location().String(),
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(debugInfo)
 }
