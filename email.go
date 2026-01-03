@@ -136,7 +136,7 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
 	googleCalURL := generateGoogleCalendarURL(slotTime)
 
 	// Create email subject and body
-	subject := "Підтвердження онлайн-запису - безкоштовна консультація з Христина Івасюк"
+	subject := "Підтвердження онлайн-запису - безкоштовна консультація з Христиною Івасюк"
 
 	// HTML body
 	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
@@ -160,7 +160,7 @@ func (e *EmailService) SendBookingConfirmation(name, email string, slotTime time
     <div class="container">
         <div class="header">
             <h1>Підтвердження онлайн-запису</h1>
-            <p>Безкоштовна консультація з Христина Івасюк</p>
+            <p>Безкоштовна консультація з Христиною Івасюк</p>
         </div>
         <div class="content">
             <p>Вітаємо, <strong>%s</strong>!</p>
