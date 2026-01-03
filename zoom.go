@@ -153,7 +153,7 @@ func (z *ZoomService) CreateMeeting(name, email string, slotTime time.Time) (str
 		StartTime: slotTime.UTC().Format("2006-01-02T15:04:05Z"),
 		Duration:  30,
 		Timezone:  "UTC",
-		Agenda:    fmt.Sprintf("Безкоштовна консультація з %s (%s)", name, email),
+		Agenda:    fmt.Sprintf("Онлайн-консультація з %s (%s)", name, email),
 		Settings: zoomMeetingSettings{
 			HostVideo:        true,
 			ParticipantVideo: true,

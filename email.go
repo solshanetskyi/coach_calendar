@@ -107,7 +107,7 @@ UID:%s
 DTSTAMP:%s
 DTSTART:%s
 DTEND:%s
-SUMMARY:Безкоштовна консультація з %s
+SUMMARY:Онлайн консультація з %s
 DESCRIPTION:Your coaching appointment has been confirmed.\n\nClient: %s\nEmail: %s
 LOCATION:Online/TBD
 STATUS:CONFIRMED
