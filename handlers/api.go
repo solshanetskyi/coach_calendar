@@ -393,7 +393,7 @@ func (h *APIHandlers) DebugBlockedSlots(w http.ResponseWriter, r *http.Request) 
 		Location        string `json:"location"`
 	}
 
-	rows, err := h.DB.Query("SELECT slot_time FROM blocked_slots WHERE slot_time LIKE '2026-%' LIMIT 20")
+	rows, err := h.DB.Query("SELECT slot_time FROM blocked_slots")
 	if err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
