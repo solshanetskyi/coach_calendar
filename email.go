@@ -107,7 +107,7 @@ UID:%s
 DTSTAMP:%s
 DTSTART:%s
 DTEND:%s
-SUMMARY:Coaching Session with %s
+SUMMARY:Безкоштовна консультація з %s
 DESCRIPTION:Your coaching appointment has been confirmed.\n\nClient: %s\nEmail: %s
 LOCATION:Online/TBD
 STATUS:CONFIRMED
@@ -115,7 +115,7 @@ SEQUENCE:0
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
-DESCRIPTION:Reminder: Coaching session in 15 minutes
+DESCRIPTION:Reminder: Онлайн консультація з %s починається через 15 хвилин
 END:VALARM
 END:VEVENT
 END:VCALENDAR`, eventID, now, startUTC, endUTC, name, name, email)

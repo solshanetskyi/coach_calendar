@@ -30,13 +30,13 @@ type zoomTokenResponse struct {
 }
 
 type zoomMeetingRequest struct {
-	Topic      string              `json:"topic"`
-	Type       int                 `json:"type"`
-	StartTime  string              `json:"start_time"`
-	Duration   int                 `json:"duration"`
-	Timezone   string              `json:"timezone"`
-	Agenda     string              `json:"agenda"`
-	Settings   zoomMeetingSettings `json:"settings"`
+	Topic     string              `json:"topic"`
+	Type      int                 `json:"type"`
+	StartTime string              `json:"start_time"`
+	Duration  int                 `json:"duration"`
+	Timezone  string              `json:"timezone"`
+	Agenda    string              `json:"agenda"`
+	Settings  zoomMeetingSettings `json:"settings"`
 }
 
 type zoomMeetingSettings struct {
@@ -144,7 +144,7 @@ func (z *ZoomService) CreateMeeting(name, email string, slotTime time.Time) (str
 	}
 
 	// Format the meeting topic
-	topic := fmt.Sprintf("Coaching Session - %s", name)
+	topic := fmt.Sprintf("Онлайн-консультація - %s", name)
 
 	// Prepare meeting request
 	meetingReq := zoomMeetingRequest{
@@ -153,7 +153,7 @@ func (z *ZoomService) CreateMeeting(name, email string, slotTime time.Time) (str
 		StartTime: slotTime.UTC().Format("2006-01-02T15:04:05Z"),
 		Duration:  30,
 		Timezone:  "UTC",
-		Agenda:    fmt.Sprintf("Coaching session with %s (%s)", name, email),
+		Agenda:    fmt.Sprintf("Безкоштовна консультація з %s (%s)", name, email),
 		Settings: zoomMeetingSettings{
 			HostVideo:        true,
 			ParticipantVideo: true,
