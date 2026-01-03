@@ -101,18 +101,24 @@ func (h *APIHandlers) GetSlots(w http.ResponseWriter, r *http.Request) {
 	}
 	defer blockedRows.Close()
 
-	blockedSlots := make(map[string]bool)
+	blockedSlots := make(map[int64]bool)
 	for blockedRows.Next() {
 		var slotTime time.Time
 		if err := blockedRows.Scan(&slotTime); err != nil {
 			continue
 		}
-		blockedSlots[slotTime.Format(time.RFC3339)] = true
+		// Use Unix timestamp for timezone-independent comparison
+		blockedSlots[slotTime.Unix()] = true
 	}
 
 	// Mark booked and blocked slots as unavailable
 	for i := range slots {
-		if bookedSlots[slots[i].SlotTime] || blockedSlots[slots[i].SlotTime] {
+		// Parse slot time to compare as Unix timestamp
+		slotTime, err := time.Parse(time.RFC3339, slots[i].SlotTime)
+		if err != nil {
+			continue
+		}
+		if bookedSlots[slots[i].SlotTime] || blockedSlots[slotTime.Unix()] {
 			slots[i].Available = false
 		}
 	}
@@ -223,7 +229,7 @@ func (h *APIHandlers) GetAdminSlots(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get blocked slots
-	blockedMap := make(map[string]bool)
+	blockedMap := make(map[int64]bool)
 	blockedRows, err := h.DB.Query("SELECT slot_time FROM blocked_slots")
 	if err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)
@@ -237,7 +243,8 @@ func (h *APIHandlers) GetAdminSlots(w http.ResponseWriter, r *http.Request) {
 		if err := blockedRows.Scan(&slotTime); err != nil {
 			continue
 		}
-		blockedMap[slotTime.Format(time.RFC3339)] = true
+		// Use Unix timestamp for timezone-independent comparison
+		blockedMap[slotTime.Unix()] = true
 	}
 
 	// Build admin slots response
@@ -247,11 +254,17 @@ func (h *APIHandlers) GetAdminSlots(w http.ResponseWriter, r *http.Request) {
 			Status:   "available",
 		}
 
+		// Parse slot time for timezone-independent comparison
+		slotTime, err := time.Parse(time.RFC3339, slot.SlotTime)
+		if err != nil {
+			continue
+		}
+
 		if booking, ok := bookedMap[slot.SlotTime]; ok {
 			adminSlot.Status = "booked"
 			adminSlot.Name = booking.Name
 			adminSlot.Email = booking.Email
-		} else if blockedMap[slot.SlotTime] {
+		} else if blockedMap[slotTime.Unix()] {
 			adminSlot.Status = "blocked"
 		}
 
