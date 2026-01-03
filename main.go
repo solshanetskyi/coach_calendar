@@ -54,6 +54,7 @@ func main() {
 	http.HandleFunc("/api/admin/block", apiHandlers.BlockSlot)
 	http.HandleFunc("/api/admin/unblock", apiHandlers.UnblockSlot)
 	http.HandleFunc("/api/admin/debug-blocked", apiHandlers.DebugBlockedSlots)
+	http.HandleFunc("/api/admin/clear-all-blocked", apiHandlers.ClearAllBlockedSlots)
 
 	log.Printf("Server starting on port %s", port)
 	if err := http.ListenAndServe(":"+port, nil); err != nil {

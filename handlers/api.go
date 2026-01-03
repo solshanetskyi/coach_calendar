@@ -417,3 +417,26 @@ func (h *APIHandlers) DebugBlockedSlots(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(debugInfo)
 }
+
+func (h *APIHandlers) ClearAllBlockedSlots(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Delete all blocked slots
+	result, err := h.DB.Exec("DELETE FROM blocked_slots")
+	if err != nil {
+		http.Error(w, "Failed to clear blocked slots", http.StatusInternalServerError)
+		log.Printf("Error clearing blocked slots: %v", err)
+		return
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message":       "All blocked slots cleared",
+		"rows_affected": rowsAffected,
+	})
+}
