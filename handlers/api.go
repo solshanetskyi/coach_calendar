@@ -83,13 +83,14 @@ func (h *APIHandlers) GetSlots(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	bookedSlots := make(map[string]bool)
+	bookedSlots := make(map[int64]bool)
 	for rows.Next() {
 		var slotTime time.Time
 		if err := rows.Scan(&slotTime); err != nil {
 			continue
 		}
-		bookedSlots[slotTime.Format(time.RFC3339)] = true
+		// Use Unix timestamp for timezone-independent comparison
+		bookedSlots[slotTime.Unix()] = true
 	}
 
 	// Get blocked slots from database
@@ -118,7 +119,8 @@ func (h *APIHandlers) GetSlots(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			continue
 		}
-		if bookedSlots[slots[i].SlotTime] || blockedSlots[slotTime.Unix()] {
+		unixTime := slotTime.Unix()
+		if bookedSlots[unixTime] || blockedSlots[unixTime] {
 			slots[i].Available = false
 		}
 	}
@@ -174,14 +176,14 @@ func (h *APIHandlers) CreateBooking(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var zoomLink string
-	if h.ZoomService != nil {
-		zoomLink, err = h.ZoomService.CreateMeeting(req.Name, req.Email, slotTime)
-		if err != nil {
-			// Log the error but don't fail the booking
-			log.Printf("Warning: Booking created but failed to create Zoom meeting: %v", err)
-		}
-	}
+	var zoomLink string = "test"
+	// if h.ZoomService != nil {
+	// 	zoomLink, err = h.ZoomService.CreateMeeting(req.Name, req.Email, slotTime)
+	// 	if err != nil {
+	// 		// Log the error but don't fail the booking
+	// 		log.Printf("Warning: Booking created but failed to create Zoom meeting: %v", err)
+	// 	}
+	// }
 
 	// Send confirmation email
 	if h.EmailService != nil {
@@ -209,7 +211,7 @@ func (h *APIHandlers) GetAdminSlots(w http.ResponseWriter, r *http.Request) {
 	adminSlots := make([]AdminSlot, 0, len(slots))
 
 	// Get booked slots with booking info
-	bookedMap := make(map[string]Booking)
+	bookedMap := make(map[int64]Booking)
 	bookingRows, err := h.DB.Query("SELECT slot_time, name, email FROM bookings")
 	if err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)
@@ -224,7 +226,8 @@ func (h *APIHandlers) GetAdminSlots(w http.ResponseWriter, r *http.Request) {
 		if err := bookingRows.Scan(&slotTime, &name, &email); err != nil {
 			continue
 		}
-		bookedMap[slotTime.Format(time.RFC3339)] = Booking{
+		// Use Unix timestamp for timezone-independent comparison
+		bookedMap[slotTime.Unix()] = Booking{
 			SlotTime: slotTime,
 			Name:     name,
 			Email:    email,
@@ -263,11 +266,12 @@ func (h *APIHandlers) GetAdminSlots(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		if booking, ok := bookedMap[slot.SlotTime]; ok {
+		unixTime := slotTime.Unix()
+		if booking, ok := bookedMap[unixTime]; ok {
 			adminSlot.Status = "booked"
 			adminSlot.Name = booking.Name
 			adminSlot.Email = booking.Email
-		} else if blockedMap[slotTime.Unix()] {
+		} else if blockedMap[unixTime] {
 			adminSlot.Status = "blocked"
 		}
 
@@ -393,7 +397,7 @@ func (h *APIHandlers) DebugBlockedSlots(w http.ResponseWriter, r *http.Request) 
 		Location        string `json:"location"`
 	}
 
-	rows, err := h.DB.Query("SELECT slot_time FROM blocked_slots")
+	rows, err := h.DB.Query("SELECT slot_time FROM blocked_slots WHERE slot_time LIKE '2026-%' LIMIT 20")
 	if err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
