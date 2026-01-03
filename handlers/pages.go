@@ -389,7 +389,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 <body>
     <div class="container">
         <div class="header">
-            <h1>Бронювання зустрічі</h1>
+            <h1>Бронювання 30-хвилинної онлайн-консультації з Христиною Івасюк</h1>
             <p>Виберіть день, потім оберіть зручний для вас час</p>
             <div class="timezone-info" id="timezoneInfo">Завантаження часового поясу...</div>
             <div class="duration-toggle">

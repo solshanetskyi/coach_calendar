@@ -36,7 +36,10 @@
       "Bash(do)",
       "Bash(echo:*)",
       "Bash(done)",
-      "Bash(./clear_prod_blocks.sh:*)"
+      "Bash(./clear_prod_blocks.sh:*)",
+      "Bash(timeout 3 make:*)",
+      "Bash(gtimeout:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []

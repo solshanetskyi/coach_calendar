@@ -7,7 +7,7 @@ API_URL ?= http://localhost:8080
 PROD_URL ?= https://sweip8cyfh.eu-central-1.awsapprunner.com
 
 # Number of days to block slots ahead
-DAYS ?= 1
+DAYS ?= 30
 
 # Test email recipient
 TEST_EMAIL ?= sergii.olshanetskyi@gmail.com
@@ -61,6 +61,9 @@ build-email-script:
 
 # Run the application
 run: build
+	@echo "Checking for existing coach-calendar process..."
+	@pkill -f ./coach-calendar || true
+	@sleep 1
 	@echo "Starting coach-calendar on port 8080..."
 	@./coach-calendar
 
